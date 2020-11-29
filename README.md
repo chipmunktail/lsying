@@ -1,8 +1,5 @@
 # lsying
 
-## 管理系统主页
-
-
 ### 设置nodejs镜像
 ```text
 npm config set registry https://registry.npm.taobao.org
