@@ -1,7 +1,7 @@
-# spring-boot-plus-vue
+# lsying
 
 ## 管理系统主页
-[http://47.105.159.10/](http://47.105.159.10/)
+
 
 ### 设置nodejs镜像
 ```text
