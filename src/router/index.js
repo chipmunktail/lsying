@@ -106,7 +106,8 @@ export const constantRoutes = [
     component: Layout,
     children: [
       {
-        path: 'http://localhost:8888/api/doc.html',
+        // path: 'http://localhost:8888/api/doc.html',
+        path: 'http://116.62.196.62:8888/api/doc.html',
         meta: { title: 'knife4j', icon: 'link' }
       }
     ]
