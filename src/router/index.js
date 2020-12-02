@@ -188,6 +188,24 @@ export const asyncRoutes = [
 
     ]
   },
+  {
+    path: '/device',
+    component: Layout,
+    redirect: '/device/list',
+    name: 'device',
+    meta: {
+      title: '设备管理',
+      icon: 'seting'
+    },
+    children: [
+      {
+        path: 'device-list',
+        component: () => import('@/views/device/list/index'),
+        name: 'deviceList',
+        meta: { title: '设备列表', icon: 'edit' }
+      }
+    ]
+  },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
