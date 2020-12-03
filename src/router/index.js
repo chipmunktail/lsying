@@ -106,7 +106,8 @@ export const constantRoutes = [
     component: Layout,
     children: [
       {
-        path: 'http://localhost:8888/api/doc.html',
+        // path: 'http://localhost:8888/api/doc.html',
+        path: 'http://116.62.196.62:8888/api/doc.html',
         meta: { title: 'knife4j', icon: 'link' }
       }
     ]
@@ -185,6 +186,24 @@ export const asyncRoutes = [
       //   meta: { title: '部门管理', icon: 'edit' }
       // }
 
+    ]
+  },
+  {
+    path: '/device',
+    component: Layout,
+    redirect: '/device/list',
+    name: 'device',
+    meta: {
+      title: '设备管理',
+      icon: 'seting'
+    },
+    children: [
+      {
+        path: 'device-list',
+        component: () => import('@/views/device/list/index'),
+        name: 'deviceList',
+        meta: { title: '设备列表', icon: 'edit' }
+      }
     ]
   },
   // 404 page must be placed at the end !!!

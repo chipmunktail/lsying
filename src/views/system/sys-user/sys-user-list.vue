@@ -6,12 +6,13 @@
         placeholder="部门名称"
         clearable
         :select-key.sync="listQuery.departmentId"
-        @change="handleFilter"/>
-      <el-select v-model="listQuery.roleId" placeholder="角色名称" @change="handleFilter" clearable class="filter-item" style="width: 120px">
-        <el-option v-for="item in roleOptions" :key="item.id" :label="item.name" :value="item.id"/>
+        @change="handleFilter"
+      />
+      <el-select v-model="listQuery.roleId" placeholder="角色名称" clearable class="filter-item" style="width: 120px" @change="handleFilter">
+        <el-option v-for="item in roleOptions" :key="item.id" :label="item.name" :value="item.id" />
       </el-select>
-      <el-select v-model="listQuery.state" placeholder="状态" @change="handleFilter" clearable class="filter-item" style="width: 120px">
-        <el-option v-for="item in stateOptions" :key="item.value" :label="item.label" :value="item.value"/>
+      <el-select v-model="listQuery.state" placeholder="状态" clearable class="filter-item" style="width: 120px" @change="handleFilter">
+        <el-option v-for="item in stateOptions" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
       <date-picker-range
         :date-range.sync="createTimeRange"
@@ -19,14 +20,14 @@
         :end-date.sync="listQuery.createTimeEnd"
         @change="handleCreateTimeFilter"
       />
-      <br/>
-      <el-input placeholder="请输入关键字进行查询" clearable v-model="searchValue" class="input-with-select" @clear="handleClear" @keyup.enter.native="handleFilter()">
-        <el-select v-model="searchColumn" slot="prepend" placeholder="请选择">
-          <el-option v-for="item in searchOptions" :key="item.value" :label="item.label" :value="item.value"/>
+      <br>
+      <el-input v-model="searchValue" placeholder="请输入关键字进行查询" clearable class="input-with-select" @clear="handleClear" @keyup.enter.native="handleFilter()">
+        <el-select slot="prepend" v-model="searchColumn" placeholder="请选择">
+          <el-option v-for="item in searchOptions" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-input>
-      <el-button v-waves type="primary" icon="el-icon-search" @click="handleFilter" style="width: 115px;">搜索</el-button>
-      <el-button type="primary" icon="el-icon-edit" @click="handleAdd" style="margin-left: 10px; width: 92px;">添加</el-button>
+      <el-button v-waves type="primary" icon="el-icon-search" style="width: 115px;" @click="handleFilter">搜索</el-button>
+      <el-button type="primary" icon="el-icon-edit" style="margin-left: 10px; width: 92px;" @click="handleAdd">添加</el-button>
     </div>
 
     <el-table
@@ -37,7 +38,9 @@
       fit
       highlight-current-row
       style="width: 100%;"
-      @sort-change="sortChange">
+      @row-click="handleRowClick"
+      @sort-change="sortChange"
+    >
       <el-table-column label="编号" prop="id" sortable="custom" align="center" width="80px" :class-name="getSortClass('id')">
         <template slot-scope="{row}">
           <span>{{ row.id }}</span>
@@ -81,16 +84,16 @@
       <el-table-column label="状态" class-name="status-col" width="100" align="center">
         <template slot-scope="{row}">
           <el-tag :type="row.state | stateClassFilter">
-            <span>{{row.state | stateFilter}}</span>
+            <span>{{ row.state | stateFilter }}</span>
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column align="center" width="240" class-name="operation">
+      <el-table-column v-if="!isPick" align="center" width="240" class-name="operation">
         <template slot="header" slot-scope="scope">
           操作
           <el-dropdown trigger="click">
             <el-link type="primary" style="vertical-align: baseline;">
-              <i class="el-icon-s-operation"/>
+              <i class="el-icon-s-operation" />
             </el-link>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item>
@@ -108,10 +111,10 @@
             </el-dropdown-menu>
           </el-dropdown>
           <el-link type="primary" style="vertical-align: baseline;margin: 0px 3px;">
-            <i class="el-icon-document"/>
+            <i class="el-icon-document" />
           </el-link>
           <el-link type="primary" style="vertical-align: baseline;">
-            <i class="el-icon-printer"/>
+            <i class="el-icon-printer" />
           </el-link>
         </template>
         <template slot-scope="{row}">
@@ -124,13 +127,13 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageIndex" :limit.sync="listQuery.pageSize" @pagination="getList"/>
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageIndex" :limit.sync="listQuery.pageSize" @pagination="getList" />
 
-    <sys-user is-detail ref="detailPage"/>
-    <sys-user is-add ref="addPage" @change="handleFilter"/>
-    <sys-user is-update ref="updatePage" @change="getList"/>
-    <sys-user-head ref="headUploadPage" @change="getList"/>
-    <sys-user-password ref="resetPasswordPage"/>
+    <sys-user ref="detailPage" is-detail />
+    <sys-user ref="addPage" is-add @change="handleFilter" />
+    <sys-user ref="updatePage" is-update @change="getList" />
+    <sys-user-head ref="headUploadPage" @change="getList" />
+    <sys-user-password ref="resetPasswordPage" />
 
   </div>
 </template>
@@ -174,6 +177,7 @@
         return stateEnum[state];
       }
     },
+    props: ['isPick'],
     data() {
       return {
         tableKey: 0,
@@ -313,6 +317,9 @@
             this.handleFilter();
           })
         });
+      },
+      handleRowClick(row) {
+        this.$emit('save', row)
       }
     }
   }
