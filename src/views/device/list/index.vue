@@ -209,7 +209,8 @@
     methods: {
       getList() {
         this.listLoading = true
-        deviceApi.getPageList(this.listQuery).then(response => {
+        const isAdmin = JSON.parse(sessionStorage.userInfo).loginSysUserVo.permissionCodes.includes('admin:device:page')
+        deviceApi.getPageList(this.listQuery, isAdmin).then(response => {
           this.list = response.data.records
           this.total = response.data.total
           this.listLoading = false

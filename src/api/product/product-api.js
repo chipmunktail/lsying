@@ -49,7 +49,6 @@ productApi.detail = id => {
  * @returns {AxiosPromise}
  */
 productApi.add = data => {
-  console.log(data, '****************')
   return request({
     url: '/commodity/add',
     method: 'post',
