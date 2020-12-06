@@ -1,10 +1,27 @@
 <template>
   <div id="device-list" class="app-container">
     <div class="filter-container">
-      <el-select v-model="listQuery.state" placeholder="状态" clearable class="filter-item" style="width: 120px" @change="handleFilter">
-        <el-option v-for="item in stateOptions" :key="item.value" :label="item.label" :value="item.value" />
+      <!-- 设备选择 -->
+      <el-select
+        v-model="deviceId"
+        filterable
+        remote
+        reserve-keyword
+        clearable
+        :remote-method="getDeviceList"
+        placeholder="请选择"
+        @change="handleDeviceChange"
+      >
+        <el-option
+          v-for="item in deviceList"
+          :key="item.id"
+          :label="item.dname"
+          :value="item.id"
+        />
       </el-select>
+      <!-- 关键字查询 -->
       <el-input
+        v-if="false"
         v-model="searchValue"
         placeholder="请输入关键字进行查询"
         clearable
@@ -21,7 +38,7 @@
         </el-select>
       </el-input>
       <el-button v-waves type="primary" icon="el-icon-search" style="width: 115px;" @click="handleFilter">搜索</el-button>
-      <el-button type="primary" icon="el-icon-edit" style="margin-left: 10px; width: 92px;" @click="handleAdd">添加
+      <el-button v-if="deviceId" type="primary" icon="el-icon-edit" style="margin-left: 10px; width: 92px;" @click="handleAdd">添加
       </el-button>
     </div>
 
@@ -47,34 +64,44 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="username" min-width="110px" align="center">
+      <el-table-column label="商品图片" min-width="110px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.username }}</span>
+          <span>{{ row.code }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="did" min-width="110px" align="center">
+      <el-table-column label="商品名称" min-width="110px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.did }}</span>
+          <span>{{ row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="dname" min-width="150px" align="center">
+      <el-table-column label="价格" min-width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.dname }}</span>
+          <span>{{ row.price }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="remarks" min-width="150px" align="center">
+      <el-table-column label="所在目录" min-width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.remarks }}</span>
+          <span>{{ row.firstCategory }} / {{ row.secondaryCategory }} / {{ row.threeCategory }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="deleted" min-width="150px" align="center">
+      <el-table-column label="发货地址" min-width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.deleted }}</span>
+          <span>{{ row.address }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" prop="createTime" sortable="custom" min-width="160px" align="center">
+      <el-table-column label="发货方式" min-width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.createTime }}</span>
+          <span>{{ row.deliveryMethod }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="品牌" min-width="150px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.brand }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="上下架" min-width="150px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.shelfStatus === 0 ? '下架' : row.shelfStatus === 1 ? '上架' : '' }}</span>
         </template>
       </el-table-column>
       <!-- <el-table-column label="deleted" class-name="status-col" width="100" align="center">
@@ -87,38 +114,12 @@
       </el-table-column> -->
       <el-table-column align="center" width="240" class-name="operation">
         <template slot="header">
-          <!--  slot-scope="scope" -->
           操作
-          <el-dropdown trigger="click">
-            <el-link type="primary" style="vertical-align: baseline;">
-              <i class="el-icon-s-operation" />
-            </el-link>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>
-                <el-checkbox v-model="tableColumnChecked">角色名称</el-checkbox>
-              </el-dropdown-item>
-              <el-dropdown-item>
-                <el-checkbox v-model="tableColumnChecked">角色编码</el-checkbox>
-              </el-dropdown-item>
-              <el-dropdown-item>
-                <el-checkbox v-model="tableColumnChecked">角色备注</el-checkbox>
-              </el-dropdown-item>
-              <el-dropdown-item>
-                <el-checkbox v-model="tableColumnChecked">状态</el-checkbox>
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-          <el-link type="primary" style="vertical-align: baseline;margin: 0px 3px;">
-            <i class="el-icon-document" />
-          </el-link>
-          <el-link type="primary" style="vertical-align: baseline;">
-            <i class="el-icon-printer" />
-          </el-link>
         </template>
         <template slot-scope="{row}">
           <el-link type="primary" @click="handDetail(row.id)">详情</el-link>
           <el-link type="warning" @click="handUpdate(row.id)">修改</el-link>
-          <el-link type="danger" @click="handleDelete(row.id, row.dname)">删除</el-link>
+          <el-link type="danger" @click="handleDelete(row.id, row.name)">删除</el-link>
         </template>
       </el-table-column>
     </el-table>
@@ -145,6 +146,7 @@
   import DeviceDialog from './components/dialog'
 
   import deviceApi from '@/api/device/device-list-api'
+  import productApi from '@/api/product/product-api'
 
   export default {
     name: 'DeviceList',
@@ -165,6 +167,7 @@
       return {
         tableKey: 0,
         list: null,
+        deviceList: null, // 设备列表
         total: 0,
         listLoading: true,
         sortColumn: 'id',
@@ -199,20 +202,44 @@
         },
         dialogPvVisible: false,
         pvData: [],
-        downloadLoading: false
+        downloadLoading: false,
+        deviceId: '' // 设备id
       }
     },
     created() {
       this.setDefaultSort()
       this.getList()
+      this.getDeviceList()
     },
     methods: {
       getList() {
         this.listLoading = true
-        deviceApi.getPageList(this.listQuery).then(response => {
+        productApi.getPageList(this.listQuery).then(response => {
           this.list = response.data.records
           this.total = response.data.total
           this.listLoading = false
+        });
+      },
+      getPageListBydid(deviceId) {
+        this.listLoading = true
+        productApi.getPageListBydid(this.listQuery, deviceId).then(response => {
+          this.list = response.data.records
+          this.total = response.data.total
+          this.listLoading = false
+        });
+      },
+      getDeviceList(str) {
+        const listQuery = {
+          pageIndex: 1,
+          pageSize: 999,
+          keyword: str,
+          name: str,
+          code: null,
+          state: null,
+          pageSorts: []
+        }
+        deviceApi.getPageList(listQuery).then(response => {
+          this.deviceList = response.data.records
         });
       },
       handleFilter() {
@@ -267,13 +294,13 @@
           this.$refs.updatePage.handle(id)
         });
       },
-      handleDelete(id, dname) {
-        this.$confirm('您确定要删除 ' + dname + ' ?', '删除提示', {
+      handleDelete(id, name) {
+        this.$confirm('您确定要删除 ' + name + ' ?', '删除提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          deviceApi.delete(id).then(response => {
+          productApi.delete(id).then(response => {
             if (response.code === 200) {
               this.$message({
                 type: 'success',
@@ -283,6 +310,15 @@
             }
           })
         })
+      },
+      // 选择设备
+      handleDeviceChange(deviceId) {
+        if (deviceId) {
+          this.deviceId = deviceId
+          this.getPageListBydid(deviceId)
+        } else {
+          this.getList()
+        }
       }
     }
   }

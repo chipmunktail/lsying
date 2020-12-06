@@ -19,6 +19,19 @@ productApi.getPageList = data => {
 }
 
 /**
+ * 获取商品分页列表 根据device id
+ * @param data
+ * @returns {AxiosPromise}
+ */
+productApi.getPageListBydid = (data, did) => {
+  return request({
+    url: '/commodity/getPageListBydid/' + did,
+    method: 'post',
+    data
+  })
+}
+
+/**
  * 商品详情
  * @param data
  * @returns {AxiosPromise}
@@ -36,6 +49,7 @@ productApi.detail = id => {
  * @returns {AxiosPromise}
  */
 productApi.add = data => {
+  console.log(data, '****************')
   return request({
     url: '/commodity/add',
     method: 'post',
