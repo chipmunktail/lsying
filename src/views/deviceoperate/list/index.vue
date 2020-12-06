@@ -37,9 +37,34 @@
           />
         </el-select>
       </el-input>
-      <el-button v-waves type="primary" icon="el-icon-search" style="width: 115px;" @click="handleFilter">搜索</el-button>
-      <el-button v-if="deviceId" type="primary" icon="el-icon-edit" style="margin-left: 10px; width: 92px;" @click="handleAdd">添加
+      <el-button
+        v-waves
+        type="primary"
+        icon="el-icon-search"
+        style="width: 115px"
+        @click="handleFilter"
+      >搜索</el-button>
+      <el-button
+        v-if="deviceId"
+        type="primary"
+        icon="el-icon-edit"
+        style="margin-left: 10px; width: 92px"
+        @click="handleAdd"
+      >添加
       </el-button>
+      {{
+        Object.keys(copyObj).length > 0 ? "[已复制" + copyObj.name + "]" : ""
+      }}
+      <el-button
+        v-if="Object.keys(copyObj).length > 0"
+        type="text"
+        @click="handleCancelCopy"
+      >[取消]</el-button>
+      <el-button
+        v-if="deviceId && Object.keys(copyObj).length > 0"
+        type="text"
+        @click="handleDoCopy"
+      >[粘贴]</el-button>
     </div>
 
     <el-table
@@ -49,7 +74,7 @@
       border
       fit
       highlight-current-row
-      style="width: 100%;"
+      style="width: 100%"
       @sort-change="sortChange"
     >
       <el-table-column
@@ -60,48 +85,60 @@
         width="80px"
         :class-name="getSortClass('id')"
       >
-        <template slot-scope="{row}">
+        <template slot-scope="{ row }">
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="商品图片" min-width="110px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.code }}</span>
+      <el-table-column label="商品图片" min-width="130px" align="center">
+        <template slot-scope="{ row }">
+          <span v-if="row.piclist">
+            <img
+              v-for="item in row.piclist.split(';')"
+              :key="item"
+              class="deviceoperate-img"
+              :src="origin + '/api/resource/' + item"
+              width="60px"
+            >
+            <!-- :src="'http://116.62.196.62:8888/api/resource/' + item" -->
+          </span>
         </template>
       </el-table-column>
       <el-table-column label="商品名称" min-width="110px" align="center">
-        <template slot-scope="{row}">
+        <template slot-scope="{ row }">
           <span>{{ row.name }}</span>
         </template>
       </el-table-column>
       <el-table-column label="价格" min-width="150px" align="center">
-        <template slot-scope="{row}">
+        <template slot-scope="{ row }">
           <span>{{ row.price }}</span>
         </template>
       </el-table-column>
       <el-table-column label="所在目录" min-width="150px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.firstCategory }} / {{ row.secondaryCategory }} / {{ row.threeCategory }}</span>
+        <template slot-scope="{ row }">
+          <span>{{ row.firstCategory }} / {{ row.secondaryCategory }} /
+            {{ row.threeCategory }}</span>
         </template>
       </el-table-column>
       <el-table-column label="发货地址" min-width="150px" align="center">
-        <template slot-scope="{row}">
+        <template slot-scope="{ row }">
           <span>{{ row.address }}</span>
         </template>
       </el-table-column>
       <el-table-column label="发货方式" min-width="150px" align="center">
-        <template slot-scope="{row}">
+        <template slot-scope="{ row }">
           <span>{{ row.deliveryMethod }}</span>
         </template>
       </el-table-column>
       <el-table-column label="品牌" min-width="150px" align="center">
-        <template slot-scope="{row}">
+        <template slot-scope="{ row }">
           <span>{{ row.brand }}</span>
         </template>
       </el-table-column>
       <el-table-column label="上下架" min-width="150px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.shelfStatus === 0 ? '下架' : row.shelfStatus === 1 ? '上架' : '' }}</span>
+        <template slot-scope="{ row }">
+          <span>{{
+            row.shelfStatus === 0 ? "下架" : row.shelfStatus === 1 ? "上架" : ""
+          }}</span>
         </template>
       </el-table-column>
       <!-- <el-table-column label="deleted" class-name="status-col" width="100" align="center">
@@ -113,19 +150,21 @@
         </template>
       </el-table-column> -->
       <el-table-column align="center" width="240" class-name="operation">
-        <template slot="header">
-          操作
-        </template>
-        <template slot-scope="{row}">
+        <template slot="header"> 操作 </template>
+        <template slot-scope="{ row }">
           <el-link type="primary" @click="handDetail(row.id)">详情</el-link>
           <el-link type="warning" @click="handUpdate(row.id)">修改</el-link>
-          <el-link type="danger" @click="handleDelete(row.id, row.name)">删除</el-link>
+          <el-link
+            type="danger"
+            @click="handleDelete(row.id, row.name)"
+          >删除</el-link>
+          <el-link type="danger" @click="handleCopy(row)">拷贝</el-link>
         </template>
       </el-table-column>
     </el-table>
 
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       :page.sync="listQuery.pageIndex"
       :limit.sync="listQuery.pageSize"
@@ -135,237 +174,259 @@
     <device-dialog ref="detailPage" is-detail />
     <device-dialog ref="addPage" is-add @change="getList" />
     <device-dialog ref="updatePage" is-update @change="getList" />
-
   </div>
 </template>
 
 <script>
-  import waves from '@/directive/waves'
-  import Pagination from '@/components/Pagination'
+import waves from "@/directive/waves";
+import Pagination from "@/components/Pagination";
 
-  import DeviceDialog from './components/dialog'
+import DeviceDialog from "./components/dialog";
 
-  import deviceApi from '@/api/device/device-list-api'
-  import productApi from '@/api/product/product-api'
+import deviceApi from "@/api/device/device-list-api";
+import productApi from "@/api/product/product-api";
 
-  export default {
-    name: 'DeviceList',
-    components: { DeviceDialog, Pagination },
-    directives: { waves },
-    filters: {
-      statusFilter(status) {
-        if (status === 0) {
-          return "info";
-        } else if (status === 1) {
-          return "success";
-        } else if (status === 2) {
-          return "warning";
-        }
-      }
-    },
-    data() {
-      return {
-        tableKey: 0,
-        list: null,
-        deviceList: null, // 设备列表
-        total: 0,
-        listLoading: true,
-        sortColumn: 'id',
-        sortAsc: false,
-        listQuery: {
-          pageIndex: 1,
-          pageSize: 10,
-          keyword: null,
-          name: null,
-          code: null,
-          state: null,
-          pageSorts: []
-        },
-        stateOptions: [
-          { label: '已删除', value: 1 },
-          { label: '未删除', value: 0 }
-        ],
-        tableColumnChecked: null,
-        searchColumn: 'keyword',
-        searchValue: null,
-        searchOptions: [
-          { label: '全部', value: 'keyword' },
-          { label: '角色名称', value: 'name' },
-          { label: '角色编码', value: 'code' }
-        ],
-        createTimeRange: null,
-        showReviewer: true,
-        dialogStatus: '',
-        textMap: {
-          update: 'Edit',
-          create: 'Create'
-        },
-        dialogPvVisible: false,
-        pvData: [],
-        downloadLoading: false,
-        deviceId: '' // 设备id
-      }
-    },
-    created() {
-      this.setDefaultSort()
-      this.getList()
-      this.getDeviceList()
-    },
-    methods: {
-      getList() {
-        this.listLoading = true
-        productApi.getPageList(this.listQuery).then(response => {
-          this.list = response.data.records
-          this.total = response.data.total
-          this.listLoading = false
-        });
-      },
-      getPageListBydid(deviceId) {
-        this.listLoading = true
-        productApi.getPageListBydid(this.listQuery, deviceId).then(response => {
-          this.list = response.data.records
-          this.total = response.data.total
-          this.listLoading = false
-        });
-      },
-      getDeviceList(str) {
-        const listQuery = {
-          pageIndex: 1,
-          pageSize: 999,
-          keyword: str,
-          name: str,
-          code: null,
-          state: null,
-          pageSorts: []
-        }
-        deviceApi.getPageList(listQuery).then(response => {
-          this.deviceList = response.data.records
-        });
-      },
-      handleFilter() {
-        this.listQuery.pageIndex = 1
-        this.listQuery.keyword = null;
-        this.listQuery.name = null;
-        this.listQuery.code = null;
-        this.listQuery[this.searchColumn] = this.searchValue;
-        this.getList()
-      },
-      setDefaultSort() {
-        // 设置默认排序
-        this.listQuery.pageSorts = [{
-          column: this.sortColumn,
-          asc: this.sortAsc
-        }]
-      },
-      sortChange(data) {
-        const { prop, order } = data
-        if (prop === 'createTime') {
-          this.sortColumn = 'create_time'
-        } else {
-          this.sortColumn = prop
-        }
-        this.sortAsc = order === 'ascending'
-        this.listQuery.pageSorts = [{
-          column: this.sortColumn,
-          asc: this.sortAsc
-        }]
-        this.handleFilter()
-      },
-      getSortClass: function(key) {
-        if (this.sortColumn === key) {
-          return this.sortAsc ? 'ascending' : 'descending'
-        } else {
-          return ''
-        }
-      },
-      handleAdd() {
-        this.dialogStatus = 'create'
-        this.$nextTick(() => {
-          this.$refs.addPage.handle()
-        });
-      },
-      handDetail(id) {
-        this.$nextTick(() => {
-          this.$refs.detailPage.handle(id)
-        });
-      },
-      handUpdate(id) {
-        this.$nextTick(() => {
-          this.$refs.updatePage.handle(id)
-        });
-      },
-      handleDelete(id, name) {
-        this.$confirm('您确定要删除 ' + name + ' ?', '删除提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          productApi.delete(id).then(response => {
-            if (response.code === 200) {
-              this.$message({
-                type: 'success',
-                message: '删除成功!'
-              });
-              this.handleFilter()
-            }
-          })
-        })
-      },
-      // 选择设备
-      handleDeviceChange(deviceId) {
-        if (deviceId) {
-          this.deviceId = deviceId
-          this.getPageListBydid(deviceId)
-        } else {
-          this.getList()
-        }
+export default {
+  name: "DeviceList",
+  components: { DeviceDialog, Pagination },
+  directives: { waves },
+  filters: {
+    statusFilter(status) {
+      if (status === 0) {
+        return "info";
+      } else if (status === 1) {
+        return "success";
+      } else if (status === 2) {
+        return "warning";
       }
     }
+  },
+  data() {
+    return {
+      tableKey: 0,
+      list: null,
+      deviceList: null, // 设备列表
+      total: 0,
+      listLoading: true,
+      sortColumn: "id",
+      sortAsc: false,
+      listQuery: {
+        pageIndex: 1,
+        pageSize: 10,
+        keyword: null,
+        name: null,
+        code: null,
+        state: null,
+        pageSorts: []
+      },
+      stateOptions: [
+        { label: "已删除", value: 1 },
+        { label: "未删除", value: 0 }
+      ],
+      tableColumnChecked: null,
+      searchColumn: "keyword",
+      searchValue: null,
+      searchOptions: [
+        { label: "全部", value: "keyword" },
+        { label: "角色名称", value: "name" },
+        { label: "角色编码", value: "code" }
+      ],
+      createTimeRange: null,
+      showReviewer: true,
+      dialogStatus: "",
+      textMap: {
+        update: "Edit",
+        create: "Create"
+      },
+      dialogPvVisible: false,
+      pvData: [],
+      downloadLoading: false,
+      deviceId: "", // 设备id
+      copyObj: {}, // 拷贝对象
+      origin: window.location.protocol + "//" + window.location.hostname + ':8888'
+    };
+  },
+  created() {
+    this.setDefaultSort();
+    this.getList();
+    this.getDeviceList();
+  },
+  methods: {
+    getList() {
+      this.listLoading = true;
+      productApi.getPageList(this.listQuery).then((response) => {
+        this.list = response.data.records;
+        this.total = response.data.total;
+        this.listLoading = false;
+      });
+    },
+    getPageListBydid(deviceId) {
+      this.listLoading = true;
+      productApi.getPageListBydid(this.listQuery, deviceId).then((response) => {
+        this.list = response.data.records;
+        this.total = response.data.total;
+        this.listLoading = false;
+      });
+    },
+    getDeviceList(str) {
+      const listQuery = {
+        pageIndex: 1,
+        pageSize: 999,
+        keyword: str,
+        name: str,
+        code: null,
+        state: null,
+        pageSorts: []
+      };
+      deviceApi.getPageList(listQuery).then((response) => {
+        this.deviceList = response.data.records;
+      });
+    },
+    handleFilter() {
+      this.listQuery.pageIndex = 1;
+      this.listQuery.keyword = null;
+      this.listQuery.name = null;
+      this.listQuery.code = null;
+      this.listQuery[this.searchColumn] = this.searchValue;
+      this.getList();
+    },
+    setDefaultSort() {
+      // 设置默认排序
+      this.listQuery.pageSorts = [
+        {
+          column: this.sortColumn,
+          asc: this.sortAsc
+        }
+      ];
+    },
+    sortChange(data) {
+      const { prop, order } = data;
+      if (prop === "createTime") {
+        this.sortColumn = "create_time";
+      } else {
+        this.sortColumn = prop;
+      }
+      this.sortAsc = order === "ascending";
+      this.listQuery.pageSorts = [
+        {
+          column: this.sortColumn,
+          asc: this.sortAsc
+        }
+      ];
+      this.handleFilter();
+    },
+    getSortClass: function(key) {
+      if (this.sortColumn === key) {
+        return this.sortAsc ? "ascending" : "descending";
+      } else {
+        return "";
+      }
+    },
+    handleAdd() {
+      this.dialogStatus = "create";
+      this.$nextTick(() => {
+        this.$refs.addPage.handle();
+      });
+    },
+    handDetail(id) {
+      this.$nextTick(() => {
+        this.$refs.detailPage.handle(id);
+      });
+    },
+    handUpdate(id) {
+      this.$nextTick(() => {
+        this.$refs.updatePage.handle(id);
+      });
+    },
+    handleDelete(id, name) {
+      this.$confirm("您确定要删除 " + name + " ?", "删除提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        productApi.delete(id).then((response) => {
+          if (response.code === 200) {
+            this.$message({
+              type: "success",
+              message: "删除成功!"
+            });
+            this.handleFilter();
+          }
+        });
+      });
+    },
+    // 选择设备
+    handleDeviceChange(deviceId) {
+      if (deviceId) {
+        this.deviceId = deviceId;
+        this.getPageListBydid(deviceId);
+      } else {
+        this.getList();
+      }
+    },
+    // 拷贝
+    handleCopy(row) {
+      this.copyObj = row;
+    },
+    handleCancelCopy() {
+      this.copyObj = {};
+    },
+    handleDoCopy() {
+      productApi
+        .copy(this.deviceId, this.copyObj)
+        .then((res) => {
+          this.$message.success("拷贝成功");
+          this.copyObj = {};
+          this.getList();
+        })
+        // .catch((err) => {
+        // });
+    }
   }
+};
 </script>
 
 <style lang="scss">
-  #device-list {
-  }
+#device-list {
+}
 
-  #device-list .el-table th {
-    padding: 6px 0px;
-  }
+#device-list .el-table th {
+  padding: 6px 0px;
+}
 
-  #device-list .el-table td {
-    padding: 8px 0px;
-    /*border: 1px solid red;*/
-  }
+#device-list .el-table td {
+  padding: 8px 0px;
+  /*border: 1px solid red;*/
+}
 
-  #device-list .filter-container {
-    /*border: 1px solid red;*/
-    /*padding-bottom: 10px;*/
-  }
+#device-list .filter-container {
+  /*border: 1px solid red;*/
+  /*padding-bottom: 10px;*/
+}
 
-  #device-list .input-with-select {
-    /*border: 1px solid red;*/
-    /*vertical-align: top;*/
-    width: 505px;
-    margin-right: 4px;
-  }
+#device-list .input-with-select {
+  /*border: 1px solid red;*/
+  /*vertical-align: top;*/
+  width: 505px;
+  margin-right: 4px;
+}
 
-  #device-list .input-with-select .el-select .el-input {
-    width: 120px;
-  }
+#device-list .input-with-select .el-select .el-input {
+  width: 120px;
+}
 
-  .input-with-select .el-input-group__prepend {
-    background-color: #fff;
-  }
+.input-with-select .el-input-group__prepend {
+  background-color: #fff;
+}
 
-  #device-list .filter-item {
-    margin-right: 4px;
-    /*border: 1px solid red;*/
-    vertical-align: baseline;
-  }
+#device-list .filter-item {
+  margin-right: 4px;
+  /*border: 1px solid red;*/
+  vertical-align: baseline;
+}
 
-  #device-list .el-table__body .operation .cell {
-    /*border: 1px solid blue;*/
-    text-align: center;
-  }
-
+#device-list .el-table__body .operation .cell {
+  /*border: 1px solid blue;*/
+  text-align: center;
+}
 </style>

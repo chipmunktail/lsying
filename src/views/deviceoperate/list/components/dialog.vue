@@ -11,14 +11,18 @@
       label-position="right"
       label-width="80px"
       class="page-form"
-      style="width: 100%;"
+      style="width: 100%"
       size="mini"
     >
       <el-form-item label="商品名" prop="name">
         <el-input v-model="form.name" :readonly="isDetail" />
       </el-form-item>
       <el-form-item label="随机字符">
-        <el-radio-group v-model="form.state" :disabled="isDetail" @change="handleRamdenChange">
+        <el-radio-group
+          v-model="form.state"
+          :disabled="isDetail"
+          @change="handleRamdenChange"
+        >
           <el-radio :label="1">前2随机</el-radio>
           <el-radio :label="2">后2随机</el-radio>
           <el-radio :label="3">无</el-radio>
@@ -75,12 +79,18 @@
       </el-form-item>
       <!-- todo -->
       <el-form-item label="商品描述" prop="descript">
-        <el-input v-model="form.descript" :autosize="{ minRows: 2, maxRows: 4}" :readonly="isDetail" />
+        <el-input
+          v-model="form.descript"
+          :autosize="{ minRows: 2, maxRows: 4 }"
+          :readonly="isDetail"
+        />
       </el-form-item>
-      <!-- todo -->
-      <!-- <el-form-item label="截图范围" prop="dname">
-        <el-input v-model="form.dname" :readonly="isDetail" />
-      </el-form-item> -->
+      <el-form-item label="截图范围">
+        <el-input v-model="form.leftend" placeholder="左结束" :readonly="isDetail" />
+        <el-input v-model="form.leftstart" placeholder="左开始" :readonly="isDetail" />
+        <el-input v-model="form.upstart" placeholder="上开始" :readonly="isDetail" />
+        <el-input v-model="form.upend" placeholder="上结束" :readonly="isDetail" />
+      </el-form-item>
       <el-form-item label="展示图" prop="piclist">
         <!--  -->
         <el-upload
@@ -92,16 +102,41 @@
           :file-list="fileList"
           :auto-upload="false"
         >
-          <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+          <el-button
+            slot="trigger"
+            size="small"
+            type="primary"
+          >选取文件（最少两张）</el-button>
+          <el-button
+            v-if="fileList.length > 0"
+            icon="el-icon-upload"
+            type="primary"
+            @click="saveFile"
+          >开始上传</el-button>
         </el-upload>
-        <!--  -->
-        <span style="color: red">（最少两张）</span>
-        <el-button @click="saveFile">saveFile</el-button>
+        <div v-if="form.piclist && form.piclist.length > 0">
+          <div v-for="(item) in form.piclist.split(';')" :key="item">
+            <img
+              class="deviceoperate-img"
+              :src="origin + '/api/resource/' + item"
+              width="120px"
+            >
+            <!-- :src="'http://116.62.196.62:8888/api/resource/' + item" -->
+            
+            <!-- <i
+              class="el-icon-delete deviceoperate-delete"
+              @click="handleDeleteImg(item, index)"
+            ></i> -->
+          </div>
+        </div>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <template v-if="isDetail">
-        <el-button type="primary" @click="dialogVisible=false">关闭</el-button>
+        <el-button
+          type="primary"
+          @click="dialogVisible = false"
+        >关闭</el-button>
       </template>
       <template v-else-if="isAdd">
         <el-button @click="restForm()">取消</el-button>
@@ -118,260 +153,331 @@
 </template>
 
 <script>
-  import productApi from '@/api/product/product-api'
-  import UserDialog from './userDialog'
+import productApi from "@/api/product/product-api";
+import UserDialog from "./userDialog";
 
-  import axios from 'axios'
+import axios from "axios";
 
-  export default {
-    name: 'DeviceDialog',
-    components: {
-      UserDialog
+export default {
+  name: "DeviceDialog",
+  components: {
+    UserDialog
+  },
+  props: {
+    // detail: 详细页面，add: 添加页面，update：编辑页面
+    isDetail: {
+      type: Boolean,
+      default: false
     },
-    props: {
-      // detail: 详细页面，add: 添加页面，update：编辑页面
-      isDetail: {
-        type: Boolean,
-        default: false
+    isAdd: {
+      type: Boolean,
+      default: false
+    },
+    isUpdate: {
+      type: Boolean,
+      default: false
+    }
+  },
+  data() {
+    return {
+      dialogVisible: false,
+      dialogTitle: null,
+      form: {
+        id: 0,
+        did: 0,
+        name: "",
+        code: "",
+        price: "",
+        firstCategory: "",
+        secondaryCategory: "",
+        threeCategory: "",
+        brand: "",
+        address: "",
+        deliveryMethod: "",
+        freightPayer: "",
+        deliveryDate: "",
+        onstate: "",
+        shelfStatus: 0,
+        piclist: [],
+        descript: "",
+        createTime: "",
+        updateTime: "",
+        deleted: 0,
+        upend: '',
+        upstart: '',
+        leftend: '',
+        leftstart: ''
       },
-      isAdd: {
-        type: Boolean,
-        default: false
+      updateId: null,
+      rules: {
+        dname: [
+          { required: true, message: "请输入商品名称", trigger: "blur" }
+          // { min: 4, max: 16, message: '长度在 2 到 10 个字符', trigger: 'blur' }
+        ]
+        // state: [
+        //   { required: true, message: '请选择状态', trigger: 'change' }
+        // ]
       },
-      isUpdate: {
-        type: Boolean,
-        default: false
+      addressList: [
+        { value: 1, label: "东京" },
+        { value: 2, label: "埼玉" },
+        { value: 3, label: "千叶" },
+        { value: 4, label: "神奈川" },
+        { value: 5, label: "群马" },
+        { value: 6, label: "大阪" },
+        { value: 7, label: "未定" }
+      ],
+      // img
+      fileList: [],
+      formData: {},
+      origin: window.location.protocol + "//" + window.location.hostname + ':8888'
+    };
+  },
+  computed: {},
+  created() {},
+  methods: {
+    handle(id) {
+      // alert(111)
+      if (this.isDetail) {
+        console.log("detail..." + id);
+        this.rules = null;
+        this.dialogTitle = "商品详情";
+        this.getRoleDetail(id);
+      } else if (this.isAdd) {
+        console.log("add...");
+        this.dialogTitle = "新增商品";
+      } else if (this.isUpdate) {
+        console.log("update...");
+        this.dialogTitle = "修改商品";
+        this.updateId = id;
+        this.getRoleDetail(id);
+      }
+      this.dialogVisible = true;
+    },
+    submitAddForm() {
+      console.log(this.$parent.deviceId);
+      this.$refs.DeviceDialogForm.validate((valid) => {
+        if (valid) {
+          console.log("submit!");
+          this.addRole();
+          // this.$emit("getList")
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    },
+    submitUpdateForm() {
+      this.$refs.DeviceDialogForm.validate((valid) => {
+        if (valid) {
+          console.log("submit!");
+          this.updateRole();
+          // this.$emit("getList")
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    },
+    getRoleDetail(id) {
+      productApi.detail(id).then((response) => {
+        if (response.code === 200) {
+          this.form = response.data;
+          if (this.form.piclist) {
+            this.fileList = this.form.piclist.split(';') 
+          }
+        }
+      });
+    },
+    addRole() {
+      this.form.deviceId = this.$parent.deviceId;
+      const addParam = this.form;
+      productApi.add(addParam).then((response) => {
+        if (response.code === 200) {
+          this.restForm();
+          this.$message({
+            message: "保存商品成功",
+            type: "success"
+          });
+          this.$emit("change");
+        }
+      });
+    },
+    updateRole() {
+      productApi.update(this.form).then((response) => {
+        if (response.code === 200) {
+          this.restForm();
+          this.$message({
+            message: "修改商品成功",
+            type: "success"
+          });
+          this.$emit("change");
+        }
+      });
+    },
+    restForm() {
+      this.$refs.DeviceDialogForm.resetFields();
+      this.dialogVisible = false;
+    },
+    handOpenUserDialog() {
+      this.$nextTick(() => {
+        this.$refs.userDialog.handle();
+      });
+    },
+    handleSave(row) {},
+    // handle随机字符串
+    handleRamdenChange(v) {
+      function randomCoding() {
+        var arr = [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z"
+        ];
+        var idvalue = "";
+        var n = 2;
+        for (var i = 0; i < n; i++) {
+          idvalue += arr[Math.floor(Math.random() * 26)];
+        }
+        return idvalue;
+      }
+      if (v === 1) {
+        this.form.name = randomCoding() + this.form.name;
+      }
+      if (v === 2) {
+        this.form.name = this.form.name + randomCoding();
+      }
+      if (v === 3) {
+        this.form.name = "";
       }
     },
-    data() {
-      return {
-        dialogVisible: false,
-        dialogTitle: null,
-        form: {
-          id: 0,
-          did: 0,
-          name: "",
-          code: "",
-          price: "",
-          firstCategory: "",
-          secondaryCategory: "",
-          threeCategory: "",
-          brand: "",
-          address: "",
-          deliveryMethod: "",
-          freightPayer: "",
-          deliveryDate: "",
-          onstate: "",
-          shelfStatus: 0,
-          piclist: ['http://www.baidu.com/test'],
-          descript: "",
-          createTime: "",
-          updateTime: "",
-          deleted: 0
-        },
-        updateId: null,
-        rules: {
-          dname: [
-            { required: true, message: '请输入商品名称', trigger: 'blur' }
-            // { min: 4, max: 16, message: '长度在 2 到 10 个字符', trigger: 'blur' }
-          ]
-          // state: [
-          //   { required: true, message: '请选择状态', trigger: 'change' }
-          // ]
-        },
-        addressList: [
-          { value: 1, label: '东京' },
-          { value: 2, label: '埼玉' },
-          { value: 3, label: '千叶' },
-          { value: 4, label: '神奈川' },
-          { value: 5, label: '群马' },
-          { value: 6, label: '大阪' },
-          { value: 7, label: '未定' }
-        ],
-        // img
-        fileList: [
-          { name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100' }
-        ],
-        formData: {}
+    // 上传图片成功
+    // on-change：文件状态改变时的钩子，添加文件、上传成功和上传失败时都会被调用
+    fileChange(file, fileList) {
+      console.log('fileChange=====', fileList)
+      this.fileList = fileList;
+      const existFile = fileList
+        .slice(0, fileList.length - 1)
+        .find((f) => f.name === file.name); // 如果文件名重复
+      if (existFile) {
+        this.$message.error("当前文件已经存在!");
+        fileList.pop();
       }
     },
-    computed: {},
-    created() {
+    // on-remove：文件列表移除文件时的钩子
+    removeFile(file, fileList) {
+      this.fileList = fileList; // 此处fileList为删除文件后，剩余的文件
     },
-    methods: {
-      handle(id) {
-        // alert(111)
-        if (this.isDetail) {
-          console.log('detail...' + id)
-          this.rules = null;
-          this.dialogTitle = '商品详情';
-          this.getRoleDetail(id);
-        } else if (this.isAdd) {
-          console.log('add...')
-          this.dialogTitle = '新增商品';
-        } else if (this.isUpdate) {
-          console.log('update...')
-          this.dialogTitle = '修改商品';
-          this.updateId = id;
-          this.getRoleDetail(id);
-        }
-        this.dialogVisible = true
-      },
-      submitAddForm() {
-        console.log(this.$parent.deviceId)
-        this.$refs.DeviceDialogForm.validate((valid) => {
-          if (valid) {
-            console.log('submit!')
-            this.addRole()
-            // this.$emit("getList")
-          } else {
-            console.log('error submit!!')
-            return false
-          }
-        });
-      },
-      submitUpdateForm() {
-        this.$refs.DeviceDialogForm.validate((valid) => {
-          if (valid) {
-            console.log('submit!')
-            this.updateRole()
-            // this.$emit("getList")
-          } else {
-            console.log('error submit!!')
-            return false
-          }
-        });
-      },
-      getRoleDetail(id) {
-        productApi.detail(id).then(response => {
-          if (response.code === 200) {
-            this.form = response.data;
-          }
-        });
-      },
-      addRole() {
-        this.form.deviceId = this.$parent.deviceId
-        const addParam = this.form
-        productApi.add(addParam).then(response => {
-          if (response.code === 200) {
-            this.restForm();
-            this.$message({
-              message: '保存商品成功',
-              type: 'success'
-            })
-            this.$emit('change')
-          }
+    // 保存上传
+    saveFile() {
+      const { uploadFiles } = this.$refs.upload;
+      const formData = new FormData();
+      formData.append("token", JSON.parse(sessionStorage.userInfo).token);
+      formData.append("deviceid", this.$parent.deviceId);
+      formData.append("leftend", this.form.leftend);
+      formData.append("leftstart", this.form.leftstart);
+      formData.append("upend", this.form.upend);
+      formData.append("upstart", this.form.upstart);
+      uploadFiles.forEach((item) => {
+        formData.append("files", item.raw);
+      });
+      // 此时所有的钩子已经执行完了fileData 中存的是通过校验的数据
+      productApi
+        .upload(formData)
+        .then((res) => {
+          const temp = res.data.data.map((item) => {
+            return item.split("/resource/")[1];
+          });
+          this.form.piclist = temp.join(";");
         })
-      },
-      updateRole() {
-        productApi.update(this.form).then(response => {
-          if (response.code === 200) {
-            this.restForm();
-            this.$message({
-              message: '修改商品成功',
-              type: 'success'
-            })
-            this.$emit('change')
-          }
-        })
-      },
-      restForm() {
-        this.$refs.DeviceDialogForm.resetFields()
-        this.dialogVisible = false
-      },
-      handOpenUserDialog() {
-        this.$nextTick(() => {
-          this.$refs.userDialog.handle()
+        .catch((err) => {
+          console.log(err, "---------");
         });
-      },
-      handleSave(row) {
-      },
-      // handle随机字符串
-      handleRamdenChange(v) {
-        function randomCoding() { 
-          var arr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-          'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
-          var idvalue = '';
-          var n = 2;
-          for (var i = 0; i < n; i++) {
-              idvalue += arr[ Math.floor(Math.random() * 26) ];
-          }
-          return idvalue;
-        }
-        if (v === 1) {
-          this.form.name = randomCoding() + this.form.name;
-        }
-        if (v === 2) {
-          this.form.name = this.form.name + randomCoding();
-        }
-        if (v === 3) {
-          this.form.name = '';
-        }
-      },
-      // 上传图片成功
-      // on-change：文件状态改变时的钩子，添加文件、上传成功和上传失败时都会被调用
-      fileChange(file, fileList) {
-        const existFile = fileList.slice(0, fileList.length - 1).find(f => f.name === file.name)// 如果文件名重复
-        if (existFile) {
-          this.$message.error('当前文件已经存在!');
-          fileList.pop()
-        }
-      },
-      // on-remove：文件列表移除文件时的钩子
-      removeFile(file, fileList) {
-        this.fileList = fileList// 此处fileList为删除文件后，剩余的文件
-      },
-      // 保存上传
-      saveFile() {
-        const { uploadFiles } = this.$refs.upload
-        const formData = new FormData()
-        formData.append('token', 'xxxxxxxxxxxs')
-        uploadFiles.forEach(item => {
-          // if (item.lastModified) {
-            formData.append('file', item)
-          // }
-        })
-        // 此时所有的钩子已经执行完了fileData 中存的是通过校验的数据
-        this.subFile(formData).then(res => {
-          // this.diaFile = false
-          // -----可写保存成功后执行的操作，此处省略
-          this.fileList = []// 清空
-        }).catch((res) => {
-        // -----可写保存失败后执行的操作，此处省略
-          // this.diaFile = false
-        })
-      },
-      // 取消
-      cancelUploadFile() {
+      // this.subFile(formData).then(res => {
+      //   // this.diaFile = false
+      //   // -----可写保存成功后执行的操作，此处省略
+      //   this.fileList = []// 清空
+      // }).catch((res) => {
+      // // -----可写保存失败后执行的操作，此处省略
+      //   // this.diaFile = false
+      // })
+    },
+    // 取消
+    cancelUploadFile() {
       // this.diaFile = false//关闭弹窗
-      this.importList = {// 清空表单其他项
-        sysName: '', // 系统名称
-        resName: '', // 资源名称
-        resItemName: '', // 资源项名称
-        fileList: ''// 文件名列表
-      }
-      this.fileList = []
-      },
-      subFile(data) {
-        return axios({
-          url: 'http://116.62.196.62:8888/api/commodity/upload',
-          method: 'post',
-          data,
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        })
-      }
+      this.importList = {
+        // 清空表单其他项
+        sysName: "", // 系统名称
+        resName: "", // 资源名称
+        resItemName: "", // 资源项名称
+        fileList: "" // 文件名列表
+      };
+      this.fileList = [];
+    },
+    subFile(data) {
+      return axios({
+        url: "http://116.62.196.62:8888/api/commodity/upload",
+        method: "post",
+        data,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      });
+    },
+    // 删除图片
+    handleDeleteImg(item, index) {
+      console.log(this.fileList, 111)
+      this.fileList.splice(index, 1);
+      console.log(this.fileList, 222)
+      this.form.piclist = this.fileList.join(";");
     }
   }
+};
 </script>
 
 <style lang="scss">
-  .sys-role-dialog{
-    margin-top: 130px !important;
-  }
+.sys-role-dialog {
+  margin-top: 130px !important;
+}
 </style>
 
 <style lang="scss" scoped>
-
+.deviceoperate-img {
+  position: relative;
+}
+.deviceoperate-delete {
+  position: relative;
+  bottom: 80px;
+  right: 45px;
+  background-color: #f0f0f0;
+  border-radius: 15px;
+  font-size: 30px;
+  padding: 2px;
+}
+.deviceoperate-delete:hover {
+  color: red;
+  cursor: pointer;
+}
 </style>
