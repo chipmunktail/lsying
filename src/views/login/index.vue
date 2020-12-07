@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Login</h3>
+        <h3 class="title">后台管理</h3>
       </div>
 
       <el-form-item prop="username">
@@ -48,10 +48,10 @@
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
 
       <div style="position:relative">
-<!--        <div class="tips">-->
-<!--          <span>Username : admin</span>-->
-<!--          <span>Password : 123456</span>-->
-<!--        </div>-->
+        <!--        <div class="tips">-->
+        <!--          <span>Username : admin</span>-->
+        <!--          <span>Password : 123456</span>-->
+        <!--        </div>-->
       </div>
     </el-form>
 
@@ -60,11 +60,11 @@
 
 <script>
 import { validUsername } from '@/utils/validate'
-import SocialSign from './components/SocialSignin'
+// import SocialSign from './components/SocialSignin'
 
 export default {
   name: 'Login',
-  components: { SocialSign },
+  // components: { SocialSign },
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
@@ -201,6 +201,8 @@ $cursor: #fff;
 
 /* reset element-ui css */
 .login-container {
+  background-image: url("../../assets/image/loginbg.png");
+  background-size: 100% 100%;
   .el-input {
     display: inline-block;
     height: 47px;
@@ -212,7 +214,7 @@ $cursor: #fff;
       -webkit-appearance: none;
       border-radius: 0px;
       padding: 12px 5px 12px 15px;
-      color: $light_gray;
+      color: #2d3a4b;
       height: 47px;
       caret-color: $cursor;
 
@@ -247,9 +249,13 @@ $light_gray:#eee;
     position: relative;
     width: 520px;
     max-width: 100%;
-    padding: 160px 35px 0;
-    margin: 0 auto;
+    padding: 35px 35px 0;
+    margin: 125px auto 0;
     overflow: hidden;
+    border: 1px solid #f0f0f0;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 3px 3px 10px 2px #283f8b;
   }
 
   .tips {
@@ -281,6 +287,7 @@ $light_gray:#eee;
       margin: 0px auto 40px auto;
       text-align: center;
       font-weight: bold;
+      color: rgb(36, 75, 158);
     }
   }
 

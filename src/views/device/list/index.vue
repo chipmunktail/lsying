@@ -77,16 +77,17 @@
           <span>{{ row.createTime }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="deleted" class-name="status-col" width="100" align="center">
+      <!-- <el-table-column label="deleted" class-name="status-col" width="100" align="center">
         <template slot-scope="{row}">
           <el-tag :type="row.deleted.toString()">
             <span v-if="row.deleted===0">未删除</span>
             <span v-else-if="row.deleted===1">已删除</span>
           </el-tag>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column align="center" width="240" class-name="operation">
-        <template slot="header" slot-scope="scope">
+        <template slot="header">
+          <!--  slot-scope="scope" -->
           操作
           <el-dropdown trigger="click">
             <el-link type="primary" style="vertical-align: baseline;">
@@ -208,7 +209,8 @@
     methods: {
       getList() {
         this.listLoading = true
-        deviceApi.getPageList(this.listQuery).then(response => {
+        const isAdmin = JSON.parse(sessionStorage.userInfo).loginSysUserVo.permissionCodes.includes('admin:device:page')
+        deviceApi.getPageList(this.listQuery, isAdmin).then(response => {
           this.list = response.data.records
           this.total = response.data.total
           this.listLoading = false

@@ -10,9 +10,10 @@ const deviceApi = {
  * @param data
  * @returns {AxiosPromise}
  */
-deviceApi.getPageList = data => {
+deviceApi.getPageList = (data, isAdmin) => {
+  const url = isAdmin ? '/deviceCommodity/getPageList' : '/deviceCommodity/getPageListByuser'
   return request({
-    url: '/deviceCommodity/getPageListByuser',
+    url: url,
     method: 'post',
     data
   })
