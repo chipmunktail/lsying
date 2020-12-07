@@ -24,7 +24,7 @@ export default {
   },
   data() {
     return {
-      title: 'lsying-game-admin',
+      title: 'lsying-admin',
       logo: 'https://geekidea.oss-cn-chengdu.aliyuncs.com/spring-boot-plus/img/logo.png'
     }
   }
