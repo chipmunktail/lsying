@@ -1,26 +1,26 @@
 <template>
   <div id="device-list" class="app-container">
     <div class="filter-container">
-      <el-select v-model="listQuery.state" placeholder="状态" clearable class="filter-item" style="width: 120px" @change="handleFilter">
-        <el-option v-for="item in stateOptions" :key="item.value" :label="item.label" :value="item.value" />
-      </el-select>
-      <el-input
-        v-model="searchValue"
-        placeholder="请输入关键字进行查询"
-        clearable
-        class="input-with-select"
-        @keyup.enter.native="getList()"
-      >
-        <el-select slot="prepend" v-model="searchColumn" placeholder="请选择">
-          <el-option
-            v-for="item in searchOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
-      </el-input>
-      <el-button v-waves type="primary" icon="el-icon-search" style="width: 115px;" @click="handleFilter">搜索</el-button>
+<!--      <el-select v-model="listQuery.state" placeholder="状态" clearable class="filter-item" style="width: 120px" @change="handleFilter">-->
+<!--        <el-option v-for="item in stateOptions" :key="item.value" :label="item.label" :value="item.value" />-->
+<!--      </el-select>-->
+<!--      <el-input-->
+<!--        v-model="searchValue"-->
+<!--        placeholder="请输入关键字进行查询"-->
+<!--        clearable-->
+<!--        class="input-with-select"-->
+<!--        @keyup.enter.native="getList()"-->
+<!--      >-->
+<!--        <el-select slot="prepend" v-model="searchColumn" placeholder="请选择">-->
+<!--          <el-option-->
+<!--            v-for="item in searchOptions"-->
+<!--            :key="item.value"-->
+<!--            :label="item.label"-->
+<!--            :value="item.value"-->
+<!--          />-->
+<!--        </el-select>-->
+<!--      </el-input>-->
+<!--      <el-button v-waves type="primary" icon="el-icon-search" style="width: 115px;" @click="handleFilter">搜索</el-button>-->
       <el-button type="primary" icon="el-icon-edit" style="margin-left: 10px; width: 92px;" @click="handleAdd">添加
       </el-button>
     </div>
@@ -47,31 +47,31 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="username" min-width="110px" align="center">
+      <el-table-column label="用户" min-width="110px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.username }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="did" min-width="110px" align="center">
+      <el-table-column label="设备编号" min-width="110px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.did }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="dname" min-width="150px" align="center">
+      <el-table-column label="设备名称" min-width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.dname }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="remarks" min-width="150px" align="center">
+      <el-table-column label="备注说明" min-width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.remarks }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="deleted" min-width="150px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.deleted }}</span>
-        </template>
-      </el-table-column>
+<!--      <el-table-column label="deleted" min-width="150px" align="center">-->
+<!--        <template slot-scope="{row}">-->
+<!--          <span>{{ row.deleted }}</span>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
       <el-table-column label="创建时间" prop="createTime" sortable="custom" min-width="160px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.createTime }}</span>

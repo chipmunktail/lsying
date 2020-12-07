@@ -9,7 +9,7 @@
         reserve-keyword
         clearable
         :remote-method="getDeviceList"
-        placeholder="请选择"
+        placeholder="请选择设备"
         @change="handleDeviceChange"
       >
         <el-option
@@ -37,13 +37,13 @@
           />
         </el-select>
       </el-input>
-      <el-button
-        v-waves
-        type="primary"
-        icon="el-icon-search"
-        style="width: 115px"
-        @click="handleFilter"
-      >搜索</el-button>
+<!--      <el-button-->
+<!--        v-waves-->
+<!--        type="primary"-->
+<!--        icon="el-icon-search"-->
+<!--        style="width: 115px"-->
+<!--        @click="handleFilter"-->
+<!--      >搜索</el-button>-->
       <el-button
         v-if="deviceId"
         type="primary"

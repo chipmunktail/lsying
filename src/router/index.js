@@ -101,17 +101,17 @@ export const constantRoutes = [
   //     }
   //   ]
   // },
-  {
-    path: 'knife4j',
-    component: Layout,
-    children: [
-      {
-        // path: 'http://localhost:8888/api/doc.html',
-        path: 'http://116.62.196.62:8888/api/doc.html',
-        meta: { title: 'knife4j', icon: 'link' }
-      }
-    ]
-  },
+  // {
+  //   path: 'knife4j',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       // path: 'http://localhost:8888/api/doc.html',
+  //       path: 'http://116.62.196.62:8888/api/doc.html',
+  //       meta: { title: 'knife4j', icon: 'link' }
+  //     }
+  //   ]
+  // },
   // {
   //   path: 'spring-boot-admin',
   //   component: Layout,
@@ -202,7 +202,7 @@ export const asyncRoutes = [
         path: 'device-list',
         component: () => import('@/views/device/list/index'),
         name: 'deviceList',
-        meta: { title: '设备列表', icon: 'edit' }
+        meta: { title: '设备管理', icon: 'edit' }
       }
     ]
   },
@@ -212,7 +212,7 @@ export const asyncRoutes = [
     redirect: '/deviceoperate/list',
     name: 'deviceoperate',
     meta: {
-      title: '设备操作',
+      title: '商品管理',
       icon: 'seting'
     },
     children: [
@@ -220,7 +220,7 @@ export const asyncRoutes = [
         path: 'deviceoperate-list',
         component: () => import('@/views/deviceoperate/list/index'),
         name: 'deviceoperateList',
-        meta: { title: '设备操作', icon: 'edit' }
+        meta: { title: '商品管理', icon: 'edit' }
       }
     ]
   },
