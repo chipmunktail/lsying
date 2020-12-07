@@ -122,7 +122,7 @@
               width="120px"
             >
             <!-- :src="'http://116.62.196.62:8888/api/resource/' + item" -->
-            
+
             <!-- <i
               class="el-icon-delete deviceoperate-delete"
               @click="handleDeleteImg(item, index)"
@@ -203,6 +203,7 @@ export default {
         createTime: "",
         updateTime: "",
         deleted: 0,
+        commoditynum: 0,
         upend: '',
         upstart: '',
         leftend: '',
@@ -284,7 +285,7 @@ export default {
         if (response.code === 200) {
           this.form = response.data;
           if (this.form.piclist) {
-            this.fileList = this.form.piclist.split(';') 
+            this.fileList = this.form.piclist.split(';')
           }
         }
       });
