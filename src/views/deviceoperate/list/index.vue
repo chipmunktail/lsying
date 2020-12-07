@@ -15,7 +15,7 @@
         <el-option
           v-for="item in deviceList"
           :key="item.id"
-          :label="item.dname"
+          :label="item.username+'：'+item.did"
           :value="item.id"
         />
       </el-select>

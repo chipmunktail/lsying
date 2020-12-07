@@ -67,11 +67,11 @@
           <span>{{ row.remarks }}</span>
         </template>
       </el-table-column>
-<!--      <el-table-column label="deleted" min-width="150px" align="center">-->
-<!--        <template slot-scope="{row}">-->
-<!--          <span>{{ row.deleted }}</span>-->
-<!--        </template>-->
-<!--      </el-table-column>-->
+      <el-table-column label="产品数量" min-width="150px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.commoditynum }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="创建时间" prop="createTime" sortable="custom" min-width="160px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.createTime }}</span>
