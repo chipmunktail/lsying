@@ -39,7 +39,7 @@
           <!--            <el-dropdown-item>Docs</el-dropdown-item>-->
           <!--          </a>-->
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">Log Out</span>
+            <span style="display:block;">登出</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -51,19 +51,24 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
-import ErrorLog from '@/components/ErrorLog'
+// import ErrorLog from '@/components/ErrorLog'
 import Screenfull from '@/components/Screenfull'
 import SizeSelect from '@/components/SizeSelect'
-import Search from '@/components/HeaderSearch'
+// import Search from '@/components/HeaderSearch'
 
 export default {
   components: {
     Breadcrumb,
     Hamburger,
-    ErrorLog,
+    // ErrorLog,
     Screenfull,
-    SizeSelect,
-    Search
+    SizeSelect
+    // Search
+  },
+  data() {
+    return {
+      userName: JSON.parse(sessionStorage.userInfo).loginSysUserVo.username
+    }
   },
   computed: {
     ...mapGetters([
@@ -71,11 +76,6 @@ export default {
       'avatar',
       'device'
     ])
-  },
-  data() {
-    return {
-      userName: JSON.parse(sessionStorage.userInfo).loginSysUserVo.username
-    }
   },
   methods: {
     toggleSideBar() {

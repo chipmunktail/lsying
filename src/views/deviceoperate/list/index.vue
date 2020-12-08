@@ -37,13 +37,13 @@
           />
         </el-select>
       </el-input>
-<!--      <el-button-->
-<!--        v-waves-->
-<!--        type="primary"-->
-<!--        icon="el-icon-search"-->
-<!--        style="width: 115px"-->
-<!--        @click="handleFilter"-->
-<!--      >搜索</el-button>-->
+      <!--      <el-button-->
+      <!--        v-waves-->
+      <!--        type="primary"-->
+      <!--        icon="el-icon-search"-->
+      <!--        style="width: 115px"-->
+      <!--        @click="handleFilter"-->
+      <!--      >搜索</el-button>-->
       <el-button
         v-if="deviceId"
         type="primary"
@@ -96,7 +96,7 @@
               v-for="item in row.piclist.split(';')"
               :key="item"
               class="deviceoperate-img"
-              :src="origin + '/api/resource/' + item"
+              :src="'http://116.62.196.62:8888/api/resource/' + item"
               width="60px"
             >
             <!-- :src="'http://116.62.196.62:8888/api/resource/' + item" -->
