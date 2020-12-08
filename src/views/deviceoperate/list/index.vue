@@ -278,8 +278,10 @@ export default {
         state: null,
         pageSorts: []
       };
-      deviceApi.getPageList(listQuery).then((response) => {
+      const isAdmin = JSON.parse(sessionStorage.userInfo).loginSysUserVo.permissionCodes.includes('admin:device:page')
+      deviceApi.getPageList(listQuery, isAdmin).then((response) => {
         this.deviceList = response.data.records;
+        console.log(this.deviceList)
       });
     },
     handleFilter() {
