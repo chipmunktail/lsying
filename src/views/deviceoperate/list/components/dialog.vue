@@ -86,10 +86,10 @@
         />
       </el-form-item>
       <el-form-item label="截图范围">
-        <el-input v-model="form.leftend" placeholder="左结束" :readonly="isDetail" />
-        <el-input v-model="form.leftstart" placeholder="左开始" :readonly="isDetail" />
-        <el-input v-model="form.upstart" placeholder="上开始" :readonly="isDetail" />
-        <el-input v-model="form.upend" placeholder="上结束" :readonly="isDetail" />
+        <el-input v-model="form.leftstart" placeholder="距左侧随机数开始" :readonly="isDetail" />
+        <el-input v-model="form.leftend" placeholder="距左侧随机数结束" :readonly="isDetail" />
+        <el-input v-model="form.upstart" placeholder="距上侧随机数开始" :readonly="isDetail" />
+        <el-input v-model="form.upend" placeholder="距上侧随机数结束" :readonly="isDetail" />
       </el-form-item>
       <el-form-item label="展示图" prop="piclist">
         <!--  -->
@@ -106,7 +106,7 @@
             slot="trigger"
             size="small"
             type="primary"
-          >选取文件（最少两张）</el-button>
+          >选取文件（最少一张）</el-button>
           <el-button
             v-if="fileList.length > 0"
             icon="el-icon-upload"
