@@ -96,7 +96,7 @@
               v-for="item in row.piclist.split(';')"
               :key="item"
               class="deviceoperate-img"
-              :src="'http://116.62.196.62:8888/api/resource/' + item"
+              :src="origin + '/api/resource/' + item"
               width="60px"
             >
             <!-- :src="'http://116.62.196.62:8888/api/resource/' + item" -->

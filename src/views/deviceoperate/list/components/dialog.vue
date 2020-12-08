@@ -139,7 +139,7 @@
           >
             <img
               class="deviceoperate-img"
-              :src="'http://116.62.196.62:8888/api/resource/' + item"
+              :src="origin + '/api/resource/' + item"
               width="120px"
             >
             <div class="deviceoperate-img-delete" @click="handleDeleteImg(item, index)">删除</div>
@@ -463,6 +463,7 @@ export default {
     },
     subFile(data) {
       return axios({
+        // todo 换成相对ip地址
         url: "http://116.62.196.62:8888/api/commodity/upload",
         method: "post",
         data,
