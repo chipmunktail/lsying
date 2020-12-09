@@ -89,9 +89,9 @@
         </el-select>
       </el-form-item>
       <!-- todo -->
-      <el-form-item label="商品描述" prop="descript">
+      <el-form-item label="商品描述" prop="description">
         <el-input
-          v-model="form.descript"
+          v-model="form.description"
           type="textarea"
           :rows="10"
           :readonly="isDetail"
@@ -221,7 +221,7 @@ export default {
         onstate: "",
         shelfStatus: 0,
         piclist: [],
-        descript: "",
+        description: "",
         createTime: "",
         updateTime: "",
         deleted: 0,
