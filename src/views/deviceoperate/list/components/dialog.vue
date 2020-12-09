@@ -50,7 +50,7 @@
         <el-input v-model="form.brand" :readonly="isDetail" />
       </el-form-item>
       <el-form-item label="发货地址" prop="address">
-        <el-select v-model="form.address" placeholder="请选择">
+        <el-select v-model="form.address" placeholder="请选择" style="width: 100%">
           <el-option
             v-for="item in addressList"
             :key="item.label"
@@ -60,29 +60,42 @@
         </el-select>
       </el-form-item>
       <el-form-item label="发货方式" prop="deliveryMethod">
-        <el-select v-model="form.deliveryMethod" placeholder="请选择">
-          <el-option value="普通邮寄" label="普通邮寄" />
-          <el-option value="letterpack" label="letterpack" />
-          <el-option value="悠悠邮寄" label="悠悠邮寄" />
+        <el-select v-model="form.deliveryMethod" :readonly="isDetail" placeholder="请选择" style="width: 100%">
+          <el-option value="普通郵便（定形、定形外）" label="普通郵便（定形、定形外）" />
+          <el-option value="レターパック" label="レターパック" />
+          <el-option value="ゆうゆうメルカリ便" label="ゆうゆうメルカリ便" />
           <el-option value="未定" label="未定" />
         </el-select>
       </el-form-item>
       <el-form-item label="运费承担人" prop="freightPayer">
-        <el-input v-model="form.freightPayer" :readonly="isDetail" />
+        <el-select v-model="form.freightPayer" :readonly="isDetail" placeholder="请选择" style="width: 100%">
+          <el-option value="送料込み（出品者負担）" label="送料込み（出品者負担）" />
+          <el-option value="着払い（購入者負担）" label="着払い（購入者負担）" />
+        </el-select>
       </el-form-item>
       <el-form-item label="发货日期" prop="deliveryDate">
-        <el-input v-model="form.deliveryDate" :readonly="isDetail" />
+        <el-select v-model="form.deliveryDate" :readonly="isDetail" placeholder="请选择" style="width: 100%">
+          <el-option value="1～2日で発送" label="1～2日で発送" />
+          <el-option value="2～3日で発送" label="2～3日で発送" />
+          <el-option value="4～7日で発送" label="4～7日で発送" />
+        </el-select>
       </el-form-item>
       <!-- todo -->
       <el-form-item label="新旧程度" prop="onstate">
-        <el-input v-model="form.onstate" :readonly="isDetail" />
+        <el-select v-model="form.onstate" :readonly="isDetail" placeholder="请选择" style="width: 100%">
+          <el-option value="新品、未使用" label="新品、未使用" />
+          <el-option value="未使用に近い" label="未使用に近い" />
+          <el-option value="目立った傷や汚れなし" label="目立った傷や汚れなし" />
+        </el-select>
       </el-form-item>
       <!-- todo -->
-      <el-form-item label="商品描述" prop="descript">
+      <el-form-item label="商品描述" prop="description">
         <el-input
-          v-model="form.descript"
-          :autosize="{ minRows: 2, maxRows: 4 }"
+          v-model="form.description"
+          type="textarea"
+          :rows="10"
           :readonly="isDetail"
+          placeholder="请输入内容"
         />
       </el-form-item>
       <el-form-item label="截图范围">
@@ -115,12 +128,21 @@
           >开始上传</el-button>
         </el-upload>
         <div v-if="form.piclist && form.piclist.length > 0">
-          <div v-for="(item) in form.piclist.split(';')" :key="item">
+          <div 
+            v-for="(item, index) in form.piclist.split(';')"
+            :key="item"
+            class="deviceoperate-img-con"
+            draggable="true"
+            @dragstart="handleDragStart($event, index, item)"
+            @dragover="handleDragOver($event, index, item)"
+            @drop="handleDrop($event, index, item)"
+          >
             <img
               class="deviceoperate-img"
               :src="origin + '/api/resource/' + item"
               width="120px"
             >
+            <div class="deviceoperate-img-delete" @click="handleDeleteImg(item, index)">删除</div>
             <!-- :src="'http://116.62.196.62:8888/api/resource/' + item" -->
 
             <!-- <i
@@ -199,7 +221,7 @@ export default {
         onstate: "",
         shelfStatus: 0,
         piclist: [],
-        descript: "",
+        description: "",
         createTime: "",
         updateTime: "",
         deleted: 0,
@@ -220,18 +242,21 @@ export default {
         // ]
       },
       addressList: [
-        { value: 1, label: "东京" },
-        { value: 2, label: "埼玉" },
-        { value: 3, label: "千叶" },
-        { value: 4, label: "神奈川" },
-        { value: 5, label: "群马" },
-        { value: 6, label: "大阪" },
+        { value: 1, label: "東京都" },
+        { value: 2, label: "埼玉県" },
+        { value: 3, label: "千葉県" },
+        { value: 4, label: "神奈川県" },
+        { value: 5, label: "群馬県" },
+        { value: 6, label: "大阪府" },
         { value: 7, label: "未定" }
       ],
       // img
       fileList: [],
       formData: {},
-      origin: window.location.protocol + "//" + window.location.hostname + ':8888'
+      origin: window.location.protocol + "//" + window.location.hostname + ':8888',
+      // 拖拽
+      dragObj: { index: 0, item: {}},
+      dropObj: { index: 0, item: {}}
     };
   },
   computed: {},
@@ -377,7 +402,6 @@ export default {
     // 上传图片成功
     // on-change：文件状态改变时的钩子，添加文件、上传成功和上传失败时都会被调用
     fileChange(file, fileList) {
-      console.log('fileChange=====', fileList)
       this.fileList = fileList;
       const existFile = fileList
         .slice(0, fileList.length - 1)
@@ -439,6 +463,7 @@ export default {
     },
     subFile(data) {
       return axios({
+        // todo 换成相对ip地址
         url: "http://116.62.196.62:8888/api/commodity/upload",
         method: "post",
         data,
@@ -449,10 +474,29 @@ export default {
     },
     // 删除图片
     handleDeleteImg(item, index) {
-      console.log(this.fileList, 111)
+      console.log(this.fileList, '==============')
       this.fileList.splice(index, 1);
-      console.log(this.fileList, 222)
-      this.form.piclist = this.fileList.join(";");
+      const arr = this.form.piclist.split(';')
+      arr.splice(index, 1)
+      this.form.piclist = arr.join(';')
+      // this.form.piclist.split(';').splice(index, 1).join(';')
+      // this.form.piclist = this.fileList.join(";");
+    },
+    // 拖拽
+    handleDragStart($event, index, item) {
+      this.dragObj = { index, item }
+    },
+    handleDragOver($event, index, item) {
+      $event.preventDefault();
+      // console.log('handleDragOver', $event, index, item)
+    },
+    handleDrop($event, index, item) {
+      this.dropObj = { index, item }
+
+      const arr = this.form.piclist.split(';')
+      arr[this.dragObj.index] = this.dropObj.item
+      arr[this.dropObj.index] = this.dragObj.item
+      this.form.piclist = arr.join(';')
     }
   }
 };
@@ -480,5 +524,20 @@ export default {
 .deviceoperate-delete:hover {
   color: red;
   cursor: pointer;
+}
+.deviceoperate-img-con {
+  display: inline-block;
+  margin: 0 5px 5px 0 ;
+}
+.deviceoperate-img-delete {
+  background-color: red;
+  color: #fff;
+  text-align: center;
+  border-radius: 3px;
+  margin: -10px 0 0;
+}
+.deviceoperate-img-delete:hover {
+  cursor: pointer;
+  background-color: rgb(253, 83, 83);
 }
 </style>
