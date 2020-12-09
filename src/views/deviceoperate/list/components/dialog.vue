@@ -317,6 +317,7 @@ export default {
     },
     addRole() {
       this.form.deviceId = this.$parent.deviceId;
+      this.form.did= this.$parent.deviceId;
       const addParam = this.form;
       productApi.add(addParam).then((response) => {
         if (response.code === 200) {
@@ -421,6 +422,7 @@ export default {
       const formData = new FormData();
       formData.append("token", JSON.parse(sessionStorage.userInfo).token);
       formData.append("deviceid", this.$parent.deviceId);
+      formData.append("did", this.$parent.deviceId);
       formData.append("leftend", this.form.leftend);
       formData.append("leftstart", this.form.leftstart);
       formData.append("upend", this.form.upend);
