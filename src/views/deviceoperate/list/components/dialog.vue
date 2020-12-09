@@ -220,7 +220,7 @@ export default {
         deliveryDate: "",
         onstate: "",
         shelfStatus: 0,
-        piclist: [],
+        piclist: "",
         description: "",
         createTime: "",
         updateTime: "",
@@ -317,7 +317,7 @@ export default {
     },
     addRole() {
       this.form.deviceId = this.$parent.deviceId;
-      this.form.did= this.$parent.deviceId;
+      this.form.did = this.$parent.deviceId;
       const addParam = this.form;
       productApi.add(addParam).then((response) => {
         if (response.code === 200) {
