@@ -89,14 +89,19 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="用户" min-width="110px" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.username }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="商品图片" min-width="130px" align="center">
         <template slot-scope="{ row }">
           <span v-if="row.piclist">
+            <!--              v-for="item in row.piclist.split(';')"-->
+            <!--              :key="item"-->
             <img
-              v-for="item in row.piclist.split(';')"
-              :key="item"
               class="deviceoperate-img"
-              :src="origin + '/api/resource/' + item"
+              :src="origin + '/api/resource/' + row.piclist.split(';')[0]"
               width="60px"
             >
             <!-- :src="'http://116.62.196.62:8888/api/resource/' + item" -->

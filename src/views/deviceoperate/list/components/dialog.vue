@@ -15,7 +15,7 @@
       size="mini"
     >
       <el-form-item label="商品名" prop="name">
-        <el-input v-model="form.name" :readonly="isDetail" />
+        <el-input v-model="form.name" :readonly="isDetail" autocomplete="off" />
       </el-form-item>
       <el-form-item label="随机字符">
         <el-radio-group
@@ -128,7 +128,7 @@
           >开始上传</el-button>
         </el-upload>
         <div v-if="form.piclist && form.piclist.length > 0">
-          <div 
+          <div
             v-for="(item, index) in form.piclist.split(';')"
             :key="item"
             class="deviceoperate-img-con"
@@ -169,7 +169,6 @@
         <el-button type="primary" @click="submitUpdateForm()">修改</el-button>
       </template>
     </div>
-
     <UserDialog ref="userDialog" @save="handleSave" />
   </el-dialog>
 </template>
