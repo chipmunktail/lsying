@@ -63,6 +63,11 @@
       <el-button
         v-if="deviceId && Object.keys(copyObj).length > 0"
         type="text"
+        @click="handUpdate(copyObj.id)"
+      >[修改]</el-button>
+      <el-button
+        v-if="deviceId && Object.keys(copyObj).length > 0"
+        type="text"
         @click="handleDoCopy"
       >[粘贴]</el-button>
     </div>
@@ -177,8 +182,8 @@
     />
 
     <device-dialog ref="detailPage" is-detail />
-    <device-dialog ref="addPage" is-add @change="getList" />
-    <device-dialog ref="updatePage" is-update @change="getList" />
+    <device-dialog ref="addPage" width="50%" is-add @change="getPageListBydid(deviceId)" />
+    <device-dialog ref="updatePage" is-update @change="getPageListBydid(deviceId)" />
   </div>
 </template>
 
@@ -382,12 +387,14 @@ export default {
       productApi
         .copy(this.deviceId, this.copyObj)
         .then((res) => {
-          this.$message.success("拷贝成功");
           this.copyObj = {};
-          this.getList();
+          this.getPageListBydid(this.deviceId)
         })
         // .catch((err) => {
         // });
+    },
+    handleCopyedit() {
+      // 编辑
     }
   }
 };
