@@ -14,7 +14,7 @@
       style="width: 100%;"
     >
       <el-form-item label="设备名称" prop="dname">
-        <el-input v-model="form.dname" :readonly="isDetail" />
+        <el-input v-model="form.dname" :readonly="isDetail" oninput="value=value.replace(/[^a-z0-9]+/gi, '')" />
       </el-form-item>
       <el-form-item label="设备编号" prop="did">
         <el-input v-model="form.did" :readonly="isDetail" />
@@ -91,12 +91,17 @@
         rules: {
           dname: [
             { required: true, message: '请输入设备名称', trigger: 'blur' }
+            // { required: true, message: '请输入设备名称', trigger: 'blur' }
             // { min: 4, max: 16, message: '长度在 2 到 10 个字符', trigger: 'blur' }
+          ],
+          did: [
+            { required: true, message: '请输入设备编号', trigger: 'blur' }
           ]
           // state: [
           //   { required: true, message: '请选择状态', trigger: 'change' }
           // ]
         }
+
       }
     },
     computed: {},
@@ -202,7 +207,7 @@
       },
       handleSave(row) {
         console.log(row, '-=-=-=-=-=-=')
-      }
+      },
     }
   }
 </script>

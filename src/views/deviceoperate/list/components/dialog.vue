@@ -2,6 +2,7 @@
   <el-dialog
     :title="dialogTitle"
     :visible.sync="dialogVisible"
+
     custom-class="page-dialog sys-role-dialog"
   >
     <el-form
@@ -15,7 +16,7 @@
       size="mini"
     >
       <el-form-item label="商品名" prop="name">
-        <el-input v-model="form.name" :readonly="isDetail" autocomplete="off" />
+        <el-input v-model="form.name" :readonly="isDetail" autocomplete="off" show-word-limit />
       </el-form-item>
       <el-form-item label="随机字符" prop="state">
         <el-radio-group
@@ -103,7 +104,7 @@
           <el-button slot="reference" size="mini">清空缓存</el-button>
         </el-popconfirm>
       </el-form-item>
-      <el-form-item label="品牌" prop="brand">
+      <el-form-item label="品牌">
         <el-input v-model="form.brand" :readonly="isDetail" />
       </el-form-item>
       <el-form-item label="发货地址" prop="address">
@@ -150,21 +151,23 @@
         <el-input
           v-model="form.description"
           type="textarea"
-          :rows="10"
+          :rows="30"
           :readonly="isDetail"
           placeholder="请输入内容"
+          maxlength="1000"
+          show-word-limit
         />
       </el-form-item>
-      <el-form-item label="截图范围 距左侧随机数开始" prop="leftstart">
+      <el-form-item label="截图范围 距左侧随机数开始">
         <el-input v-model="form.leftstart" placeholder="距左侧随机数开始" :readonly="isDetail" />
       </el-form-item>
-      <el-form-item label="截图范围 距左侧随机数结束" prop="leftstart">
+      <el-form-item label="截图范围 距左侧随机数结束">
         <el-input v-model="form.leftend" placeholder="距左侧随机数结束" prop="leftend" :readonly="isDetail" />
       </el-form-item>
-      <el-form-item label="截图范围 距上侧随机数开始" prop="leftstart">
+      <el-form-item label="截图范围 距上侧随机数开始">
         <el-input v-model="form.upstart" placeholder="距上侧随机数开始" prop="upstart" :readonly="isDetail" />
       </el-form-item>
-      <el-form-item label="截图范围 距上侧随机数结束" prop="leftstart">
+      <el-form-item label="截图范围 距上侧随机数结束">
         <el-input v-model="form.upend" placeholder="距上侧随机数结束" prop="upend" :readonly="isDetail" />
       </el-form-item>
       <el-form-item label="展示图" prop="piclist">
@@ -288,10 +291,10 @@ export default {
         updateTime: "",
         deleted: 0,
         commoditynum: 0,
-        upend: '',
-        upstart: '',
-        leftend: '',
-        leftstart: ''
+        upend: '30',
+        upstart: '10',
+        leftend: '30',
+        leftstart: '10'
       },
       updateId: null,
       rules: {
@@ -349,6 +352,9 @@ export default {
         ],
         upend: [
           { required: true, message: '请输入距上侧随机数结束', trigger: 'change' }
+        ],
+        piclist: [
+          { required: true, message: '请上传图片', trigger: 'change' }
         ]
       },
       addressList: [
@@ -470,51 +476,29 @@ export default {
     handleSave(row) {},
     // handle随机字符串
     handleRamdenChange(v) {
-      function randomCoding() {
-        var arr = [
-          "A",
-          "B",
-          "C",
-          "D",
-          "E",
-          "F",
-          "G",
-          "H",
-          "I",
-          "J",
-          "K",
-          "L",
-          "M",
-          "N",
-          "O",
-          "P",
-          "Q",
-          "R",
-          "S",
-          "T",
-          "U",
-          "V",
-          "W",
-          "X",
-          "Y",
-          "Z"
-        ];
-        var idvalue = "";
-        var n = 2;
-        for (var i = 0; i < n; i++) {
-          idvalue += arr[Math.floor(Math.random() * 26)];
-        }
-        return idvalue;
+      function randomString(e) {
+        e = e || 2;
+        var t = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678!@#$%^&*<>/*-+()=~.;|[]{}";
+        var a = t.length;
+        var n = "";
+        for (var i = 0; i < e; i++) n += t.charAt(Math.floor(Math.random() * a));
+        return n
       }
       if (v === 1) {
-        this.form.name = randomCoding() + this.form.name;
+        do {
+          var rstr = randomString(2)
+        } while (!isNaN(rstr));
+        this.form.name = rstr + this.form.name;
       }
       if (v === 2) {
-        this.form.name = this.form.name + randomCoding();
+        do {
+          var rstrs = randomString(2)
+        } while (!isNaN(rstrs));
+        this.form.name = this.form.name + rstrs;
       }
-      if (v === 3) {
-        this.form.name = "";
-      }
+      // if (v === 3) {
+      //   this.form.name = "";
+      // }
     },
     // 上传图片成功
     // on-change：文件状态改变时的钩子，添加文件、上传成功和上传失败时都会被调用
@@ -534,6 +518,13 @@ export default {
     },
     // 保存上传
     saveFile() {
+      if (Number(this.form.leftstart) > Number(this.form.leftend) || Number(this.form.upstart) > Number(this.form.upend)) {
+        this.$message({
+          type: 'error',
+          message: `上传失败，开始数必须大于结束数`
+        });
+        return
+      }
       const { uploadFiles } = this.$refs.upload;
       const formData = new FormData();
       formData.append("token", JSON.parse(sessionStorage.userInfo).token);
@@ -620,25 +611,26 @@ export default {
       // 1
       if (!localStorage.firstCategoryList) {
           localStorage.firstCategoryList = []
-      } 
+      }
+
       const arr1 = localStorage.firstCategoryList.split(',')
       arr1.push(this.form.firstCategory)
-      localStorage.firstCategoryList = arr1
+      localStorage.firstCategoryList = Array.from(new Set(arr1))
       // 2
       if (!localStorage.secondaryCategoryList) {
           localStorage.secondaryCategoryList = []
       }
       const arr2 = localStorage.secondaryCategoryList.split(',')
-      arr2.push(this.form.secondaryCategory) 
-      localStorage.secondaryCategoryList = arr2
+      arr2.push(this.form.secondaryCategory)
+      localStorage.secondaryCategoryList = Array.from(new Set(arr2))
       console.log(arr2)
       // 3
       if (!localStorage.threeCategoryList) {
           localStorage.threeCategoryList = []
-      } 
+      }
       const arr3 = localStorage.threeCategoryList.split(',')
-      arr3.push(this.form.threeCategory) 
-      localStorage.threeCategoryList = arr3
+      arr3.push(this.form.threeCategory)
+      localStorage.threeCategoryList = Array.from(new Set(arr3))
       console.log(arr3)
     },
     // 清空三级目录缓存
@@ -676,7 +668,8 @@ export default {
 
 <style lang="scss">
 .sys-role-dialog {
-  margin-top: 130px !important;
+  margin-top: 10px !important;
+
 }
 </style>
 
