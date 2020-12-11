@@ -9,7 +9,7 @@
       :rules="rules"
       :model="form"
       label-position="right"
-      label-width="80px"
+      label-width="180px"
       class="page-form"
       style="width: 100%"
       size="mini"
@@ -17,7 +17,7 @@
       <el-form-item label="商品名" prop="name">
         <el-input v-model="form.name" :readonly="isDetail" autocomplete="off" />
       </el-form-item>
-      <el-form-item label="随机字符">
+      <el-form-item label="随机字符" prop="state">
         <el-radio-group
           v-model="form.state"
           :disabled="isDetail"
@@ -38,13 +38,70 @@
         <el-input v-model="form.price" :readonly="isDetail" />
       </el-form-item>
       <el-form-item label="一级类目" prop="firstCategory">
-        <el-input v-model="form.firstCategory" :readonly="isDetail" />
+        <el-select
+          v-model="form.firstCategory"
+          filterable
+          allow-create
+          default-first-option
+          placeholder="一级类目"
+        >
+          <el-option
+            v-for="item in firstCategoryList"
+            :key="item"
+            :label="item"
+            :value="item"
+          />
+        </el-select>
+        <el-popconfirm
+          title="确认清空一级类目缓存吗？"
+          @onConfirm="clearCategory('firstCategoryList')"
+        >
+          <el-button slot="reference" size="mini">清空缓存</el-button>
+        </el-popconfirm>
       </el-form-item>
       <el-form-item label="二级类目" prop="secondaryCategory">
-        <el-input v-model="form.secondaryCategory" :readonly="isDetail" />
+        <el-select
+          v-model="form.secondaryCategory"
+          filterable
+          allow-create
+          default-first-option
+          placeholder="二级类目"
+        >
+          <el-option
+            v-for="item in secondaryCategoryList"
+            :key="item"
+            :label="item"
+            :value="item"
+          />
+        </el-select>
+        <el-popconfirm
+          title="确认清空二级类目缓存吗？"
+          @onConfirm="clearCategory('secondaryCategoryList')"
+        >
+          <el-button slot="reference" size="mini">清空缓存</el-button>
+        </el-popconfirm>
       </el-form-item>
       <el-form-item label="三级类目" prop="threeCategory">
-        <el-input v-model="form.threeCategory" :readonly="isDetail" />
+        <el-select
+          v-model="form.threeCategory"
+          filterable
+          allow-create
+          default-first-option
+          placeholder="三级类目"
+        >
+          <el-option
+            v-for="item in firstCategoryList"
+            :key="item"
+            :label="item"
+            :value="item"
+          />
+        </el-select>
+        <el-popconfirm
+          title="确认清空三级类目缓存吗？"
+          @onConfirm="clearCategory('threeCategoryList')"
+        >
+          <el-button slot="reference" size="mini">清空缓存</el-button>
+        </el-popconfirm>
       </el-form-item>
       <el-form-item label="品牌" prop="brand">
         <el-input v-model="form.brand" :readonly="isDetail" />
@@ -98,11 +155,17 @@
           placeholder="请输入内容"
         />
       </el-form-item>
-      <el-form-item label="截图范围">
+      <el-form-item label="截图范围 距左侧随机数开始" prop="leftstart">
         <el-input v-model="form.leftstart" placeholder="距左侧随机数开始" :readonly="isDetail" />
-        <el-input v-model="form.leftend" placeholder="距左侧随机数结束" :readonly="isDetail" />
-        <el-input v-model="form.upstart" placeholder="距上侧随机数开始" :readonly="isDetail" />
-        <el-input v-model="form.upend" placeholder="距上侧随机数结束" :readonly="isDetail" />
+      </el-form-item>
+      <el-form-item label="截图范围 距左侧随机数结束" prop="leftstart">
+        <el-input v-model="form.leftend" placeholder="距左侧随机数结束" prop="leftend" :readonly="isDetail" />
+      </el-form-item>
+      <el-form-item label="截图范围 距上侧随机数开始" prop="leftstart">
+        <el-input v-model="form.upstart" placeholder="距上侧随机数开始" prop="upstart" :readonly="isDetail" />
+      </el-form-item>
+      <el-form-item label="截图范围 距上侧随机数结束" prop="leftstart">
+        <el-input v-model="form.upend" placeholder="距上侧随机数结束" prop="upend" :readonly="isDetail" />
       </el-form-item>
       <el-form-item label="展示图" prop="piclist">
         <!--  -->
@@ -232,13 +295,61 @@ export default {
       },
       updateId: null,
       rules: {
-        dname: [
+        name: [
           { required: true, message: "请输入商品名称", trigger: "blur" }
           // { min: 4, max: 16, message: '长度在 2 到 10 个字符', trigger: 'blur' }
+        ],
+        state: [
+          { required: true, message: '请选择随机字符', trigger: 'change' }
+        ],
+        shelfStatus: [
+          { required: true, message: '请选择上下架状态', trigger: 'change' }
+        ],
+        price: [
+          { required: true, message: '请输入价格', trigger: 'change' }
+        ],
+        firstCategory: [
+          { required: true, message: '请输入一级类目', trigger: 'change' }
+        ],
+        secondaryCategory: [
+          { required: true, message: '请输入二级类目', trigger: 'change' }
+        ],
+        threeCategory: [
+          { required: true, message: '请输入三级类目', trigger: 'change' }
+        ],
+        brand: [
+          { required: true, message: '请输入品牌', trigger: 'change' }
+        ],
+        address: [
+          { required: true, message: '请输入发货地址', trigger: 'change' }
+        ],
+        deliveryMethod: [
+          { required: true, message: '请选择发货方式', trigger: 'change' }
+        ],
+        freightPayer: [
+          { required: true, message: '请选择运费承担人', trigger: 'change' }
+        ],
+        deliveryDate: [
+          { required: true, message: '请选择发货日期', trigger: 'change' }
+        ],
+        onstate: [
+          { required: true, message: '请选择新旧程度', trigger: 'change' }
+        ],
+        description: [
+          { required: true, message: '请输入商品描述', trigger: 'change' }
+        ],
+        leftstart: [
+          { required: true, message: '请输入距左侧随机数开始', trigger: 'change' }
+        ],
+        leftend: [
+          { required: true, message: '请输入距左侧随机数结束', trigger: 'change' }
+        ],
+        upstart: [
+          { required: true, message: '请输入距上侧随机数开始', trigger: 'change' }
+        ],
+        upend: [
+          { required: true, message: '请输入距上侧随机数结束', trigger: 'change' }
         ]
-        // state: [
-        //   { required: true, message: '请选择状态', trigger: 'change' }
-        // ]
       },
       addressList: [
         { value: 1, label: "東京都" },
@@ -255,13 +366,18 @@ export default {
       origin: window.location.protocol + "//" + window.location.hostname + ':8888',
       // 拖拽
       dragObj: { index: 0, item: {}},
-      dropObj: { index: 0, item: {}}
+      dropObj: { index: 0, item: {}},
+      // 目录list
+      firstCategoryList: [],
+      secondaryCategoryList: [],
+      threeCategoryList: []
     };
   },
   computed: {},
   created() {},
   methods: {
     handle(id) {
+      this.flushCategoryList()
       // alert(111)
       if (this.isDetail) {
         console.log("detail..." + id);
@@ -280,7 +396,6 @@ export default {
       this.dialogVisible = true;
     },
     submitAddForm() {
-      console.log(this.$parent.deviceId);
       this.$refs.DeviceDialogForm.validate((valid) => {
         if (valid) {
           console.log("submit!");
@@ -320,6 +435,7 @@ export default {
       const addParam = this.form;
       productApi.add(addParam).then((response) => {
         if (response.code === 200) {
+          this.saveCategory();
           this.restForm();
           this.$message({
             message: "保存商品成功",
@@ -332,6 +448,7 @@ export default {
     updateRole() {
       productApi.update(this.form).then((response) => {
         if (response.code === 200) {
+          this.saveCategory();
           this.restForm();
           this.$message({
             message: "修改商品成功",
@@ -475,7 +592,6 @@ export default {
     },
     // 删除图片
     handleDeleteImg(item, index) {
-      console.log(this.fileList, '==============')
       this.fileList.splice(index, 1);
       const arr = this.form.piclist.split(';')
       arr.splice(index, 1)
@@ -498,6 +614,61 @@ export default {
       arr[this.dragObj.index] = this.dropObj.item
       arr[this.dropObj.index] = this.dragObj.item
       this.form.piclist = arr.join(';')
+    },
+    // 三级目录缓存功能
+    saveCategory() {
+      // 1
+      if (!localStorage.firstCategoryList) {
+          localStorage.firstCategoryList = []
+      } 
+      const arr1 = localStorage.firstCategoryList.split(',')
+      arr1.push(this.form.firstCategory)
+      localStorage.firstCategoryList = arr1
+      // 2
+      if (!localStorage.secondaryCategoryList) {
+          localStorage.secondaryCategoryList = []
+      }
+      const arr2 = localStorage.secondaryCategoryList.split(',')
+      arr2.push(this.form.secondaryCategory) 
+      localStorage.secondaryCategoryList = arr2
+      console.log(arr2)
+      // 3
+      if (!localStorage.threeCategoryList) {
+          localStorage.threeCategoryList = []
+      } 
+      const arr3 = localStorage.threeCategoryList.split(',')
+      arr3.push(this.form.threeCategory) 
+      localStorage.threeCategoryList = arr3
+      console.log(arr3)
+    },
+    // 清空三级目录缓存
+    clearCategory(category) {
+      localStorage.removeItem(category)
+      this.$message.success('缓存清除成功')
+    },
+    // 刷新三级List
+    flushCategoryList() {
+      if (localStorage.firstCategoryList) {
+        this.firstCategoryList = localStorage.firstCategoryList.split(',').filter(item => {
+          if (item) return item
+        })
+      } else {
+        this.firstCategoryList =  []
+      }
+      if (localStorage.secondaryCategoryList) {
+        this.secondaryCategoryList = localStorage.secondaryCategoryList.split(',').filter(item => {
+          if (item) return item
+        })
+      } else {
+        this.secondaryCategoryList =  []
+      }
+      if (localStorage.threeCategoryList) {
+        this.threeCategoryList = localStorage.threeCategoryList.split(',').filter(item => {
+          if (item) return item
+        })
+      } else {
+        this.threeCategoryList =  []
+      }
     }
   }
 };
