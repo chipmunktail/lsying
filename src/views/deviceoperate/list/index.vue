@@ -20,7 +20,7 @@
         />
       </el-select>
       <!-- 关键字查询 -->
-      <el-input
+      <!-- <el-input
         v-if="false"
         v-model="searchValue"
         placeholder="请输入关键字进行查询"
@@ -36,7 +36,7 @@
             :value="item.value"
           />
         </el-select>
-      </el-input>
+      </el-input> -->
       <!--      <el-button-->
       <!--        v-waves-->
       <!--        type="primary"-->
@@ -44,6 +44,7 @@
       <!--        style="width: 115px"-->
       <!--        @click="handleFilter"-->
       <!--      >搜索</el-button>-->
+      <el-button v-if="isGetAllList" type="primary" @click="getList">获取所有商品</el-button>
       <el-button
         v-if="deviceId"
         type="primary"
@@ -63,12 +64,12 @@
       <el-button
         v-if="deviceId && Object.keys(copyObj).length > 0"
         type="text"
-        @click="handUpdate(copyObj.id)"
+        @click="handCopy(copyObj.id)"
       >[修改]</el-button>
       <el-button
         v-if="deviceId && Object.keys(copyObj).length > 0"
         type="text"
-        @click="handleDoCopy"
+        @click="handleDoCopy(copyObj)"
       >[粘贴]</el-button>
     </div>
 
@@ -178,12 +179,13 @@
       :total="total"
       :page.sync="listQuery.pageIndex"
       :limit.sync="listQuery.pageSize"
-      @pagination="getList"
+      @pagination="handlePageChange"
     />
 
     <device-dialog ref="detailPage" is-detail />
-    <device-dialog ref="addPage" width="50%" is-add @change="getPageListBydid(deviceId)" />
+    <device-dialog ref="addPage" is-add @change="getPageListBydid(deviceId)" />
     <device-dialog ref="updatePage" is-update @change="getPageListBydid(deviceId)" />
+    <device-dialog ref="copyPage" is-copy @copy="handleCopyedit" />
   </div>
 </template>
 
@@ -217,7 +219,7 @@ export default {
       list: null,
       deviceList: null, // 设备列表
       total: 0,
-      listLoading: true,
+      listLoading: false,
       sortColumn: "id",
       sortAsc: false,
       listQuery: {
@@ -253,16 +255,20 @@ export default {
       downloadLoading: false,
       deviceId: "", // 设备id
       copyObj: {}, // 拷贝对象
-      origin: window.location.protocol + "//" + window.location.hostname + ':8888'
+      origin: window.location.protocol + "//" + window.location.hostname + ':8888',
+      // 获取所有商品
+      isGetAllList: false
     };
   },
   created() {
     this.setDefaultSort();
-    this.getList();
+    // this.getPageListBydid();
     this.getDeviceList();
+    this.isGetAllList = JSON.parse(sessionStorage.userInfo).loginSysUserVo.permissionCodes.includes('admin:commodity:page')
   },
   methods: {
     getList() {
+      this.deviceId = ''
       this.listLoading = true;
       productApi.getPageList(this.listQuery).then((response) => {
         this.list = response.data.records;
@@ -271,6 +277,10 @@ export default {
       });
     },
     getPageListBydid(deviceId) {
+      if (!deviceId) {
+        this.$message.warning('请选择设备后在操作')
+        return
+      }
       this.listLoading = true;
       productApi.getPageListBydid(this.listQuery, deviceId).then((response) => {
         this.list = response.data.records;
@@ -300,7 +310,7 @@ export default {
       this.listQuery.name = null;
       this.listQuery.code = null;
       this.listQuery[this.searchColumn] = this.searchValue;
-      this.getList();
+      this.getPageListBydid(this.deviceId);
     },
     setDefaultSort() {
       // 设置默认排序
@@ -350,6 +360,11 @@ export default {
         this.$refs.updatePage.handle(id);
       });
     },
+    handCopy(id) {
+      this.$nextTick(() => {
+        this.$refs.copyPage.handle(id);
+      });
+    },
     handleDelete(id, name) {
       this.$confirm("您确定要删除 " + name + " ?", "删除提示", {
         confirmButtonText: "确定",
@@ -373,7 +388,8 @@ export default {
         this.deviceId = deviceId;
         this.getPageListBydid(deviceId);
       } else {
-        this.getList();
+        // this.getPageListBydid();
+        this.list = []
       }
     },
     // 拷贝
@@ -383,9 +399,9 @@ export default {
     handleCancelCopy() {
       this.copyObj = {};
     },
-    handleDoCopy() {
+    handleDoCopy(copyObj) {
       productApi
-        .copy(this.deviceId, this.copyObj)
+        .copy(this.deviceId, copyObj)
         .then((res) => {
           this.copyObj = {};
           this.getPageListBydid(this.deviceId)
@@ -393,8 +409,12 @@ export default {
         // .catch((err) => {
         // });
     },
-    handleCopyedit() {
-      // 编辑
+    handleCopyedit(copyObj) {
+      this.handleDoCopy(copyObj)
+    },
+    // page change
+    handlePageChange() {
+      this.deviceId ? this.getPageListBydid(this.deviceId) : this.getList()
     }
   }
 };

@@ -104,6 +104,7 @@ productApi.upload = data => {
   console.log(data.get('token'), '=-==========')
   return axios({
     method: 'post',
+    // todo 地址需要修改
     url: 'http://116.62.196.62:8888/api/commodity/upload',
     // 利用 transformRequest 进行转换配置
     // transformRequest: [
