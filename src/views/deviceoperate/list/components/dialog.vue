@@ -16,7 +16,8 @@
       size="mini"
     >
       <el-form-item label="商品名" prop="name">
-        <el-input v-model="form.name" :readonly="isDetail" autocomplete="off" show-word-limit />
+        <el-input v-model="form.name" :readonly="isDetail" autocomplete="off" :class="form.name.length > 40 ? 'deviceoperate-limit' : ''" />
+        {{ form.name.length }}/40
       </el-form-item>
       <el-form-item label="随机字符" prop="state">
         <el-radio-group
@@ -703,6 +704,12 @@ export default {
 
 }
 #deviceoperate-description > textarea {
+  color: red!important;
+}
+.deviceoperate-limit > input {
+  color: red!important;
+}
+.deviceoperate-limit {
   color: red!important;
 }
 #deviceoperate-description {
