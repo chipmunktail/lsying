@@ -37,7 +37,7 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="价格" prop="price">
-        <el-input v-model="form.price" :readonly="isDetail" />
+        <el-input  v-model="form.price" :readonly="isDetail" oninput="if(value<300)value=300;if(value>9999999)value=9999999; value=value.replace(/\D/g,'');value=value.replace('.','')" />
       </el-form-item>
       <el-form-item label="一级类目" prop="firstCategory">
         <el-select
@@ -92,7 +92,7 @@
           placeholder="三级类目"
         >
           <el-option
-            v-for="item in firstCategoryList"
+            v-for="item in threeCategoryList"
             :key="item"
             :label="item"
             :value="item"
