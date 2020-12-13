@@ -147,9 +147,12 @@
       </el-table-column>
       <el-table-column label="上下架" min-width="150px" align="center">
         <template slot-scope="{ row }">
-          <span>{{
-            row.shelfStatus === 0 ? "下架" : row.shelfStatus === 1 ? "上架" : ""
-          }}</span>
+          <el-tag :type="row.shelfStatus | stateClassFilter">
+            <span>{{ row.shelfStatus | stateFilter }}</span>
+          </el-tag>
+<!--          <span>{{-->
+<!--            row.shelfStatus === 0 ? "下架" : row.shelfStatus === 1 ? "上架" : ""-->
+<!--          }}</span>-->
         </template>
       </el-table-column>
       <!-- <el-table-column label="deleted" class-name="status-col" width="100" align="center">
@@ -197,6 +200,8 @@ import DeviceDialog from "./components/dialog";
 
 import deviceApi from "@/api/device/device-list-api";
 import productApi from "@/api/product/product-api";
+const stateEnum = { 0: '已下架', 1: '已上架' }
+const stateClassEnum = { 0: 'danger', 1: 'success' }
 
 export default {
   name: "DeviceList",
@@ -211,6 +216,12 @@ export default {
       } else if (status === 2) {
         return "warning";
       }
+    },
+    stateClassFilter(state) {
+      return stateClassEnum[state]
+    },
+    stateFilter(state) {
+      return stateEnum[state];
     }
   },
   data() {
