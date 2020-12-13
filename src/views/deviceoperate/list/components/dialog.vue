@@ -10,13 +10,14 @@
       :rules="rules"
       :model="form"
       label-position="right"
-      label-width="180px"
+      label-width="100px"
       class="page-form"
       style="width: 100%"
       size="mini"
     >
       <el-form-item label="商品名" prop="name">
-        <el-input v-model="form.name" :readonly="isDetail" autocomplete="off" show-word-limit />
+        <el-input v-model="form.name" :readonly="isDetail" autocomplete="off" :class="form.name.length > 40 ? 'deviceoperate-limit' : ''" />
+        {{ form.name.length }}/40
       </el-form-item>
       <el-form-item label="随机字符" prop="state">
         <el-radio-group
@@ -104,7 +105,7 @@
           <el-button slot="reference" size="mini">清空缓存</el-button>
         </el-popconfirm>
       </el-form-item>
-      <el-form-item label="品牌">
+      <el-form-item label="品牌" prop="brand">
         <el-input v-model="form.brand" :readonly="isDetail" />
       </el-form-item>
       <el-form-item label="发货地址" prop="address">
@@ -149,14 +150,15 @@
       <!-- todo -->
       <el-form-item label="商品描述" prop="description">
         <el-input
+          :id="form.description.length > 1000 ? 'deviceoperate-description' : ''"
           v-model="form.description"
           type="textarea"
           :rows="30"
           :readonly="isDetail"
           placeholder="请输入内容"
-          maxlength="1000"
-          show-word-limit
         />
+        {{ form.description.length }}/1000
+        <!-- deviceoperate-description -->
       </el-form-item>
       <el-form-item label="截图范围 距左侧随机数开始">
         <el-input v-model="form.leftstart" placeholder="距左侧随机数开始" :readonly="isDetail" />
@@ -234,6 +236,10 @@
         <el-button @click="restForm()">取消</el-button>
         <el-button type="primary" @click="submitUpdateForm()">修改</el-button>
       </template>
+      <template v-else-if="isCopy">
+        <el-button @click="restForm()">取消</el-button>
+        <el-button type="primary" @click="submitCopyForm()">拷贝</el-button>
+      </template>
     </div>
     <UserDialog ref="userDialog" @save="handleSave" />
   </el-dialog>
@@ -261,6 +267,10 @@ export default {
       default: false
     },
     isUpdate: {
+      type: Boolean,
+      default: false
+    },
+    isCopy: {
       type: Boolean,
       default: false
     }
@@ -320,9 +330,9 @@ export default {
         threeCategory: [
           { required: true, message: '请输入三级类目', trigger: 'change' }
         ],
-        brand: [
-          { required: true, message: '请输入品牌', trigger: 'change' }
-        ],
+        // brand: [
+        //   { required: true, message: '请输入品牌', trigger: 'change' }
+        // ],
         address: [
           { required: true, message: '请输入发货地址', trigger: 'change' }
         ],
@@ -398,6 +408,11 @@ export default {
         this.dialogTitle = "修改商品";
         this.updateId = id;
         this.getRoleDetail(id);
+      } else if (this.isCopy) {
+        console.log("copy...");
+        this.dialogTitle = "修改商品";
+        this.updateId = id;
+        this.getRoleDetail(id);
       }
       this.dialogVisible = true;
     },
@@ -425,10 +440,26 @@ export default {
         }
       });
     },
+    submitCopyForm() {
+      this.$refs.DeviceDialogForm.validate((valid) => {
+        if (valid) {
+          const tempForm = JSON.parse(JSON.stringify(this.form))
+          this.$emit("copy", tempForm)
+          this.restForm()
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    },
     getRoleDetail(id) {
       productApi.detail(id).then((response) => {
         if (response.code === 200) {
           this.form = response.data;
+          this.form.upend = 30
+          this.form.upstart = 10
+          this.form.leftend = 30
+          this.form.leftstart = 10
           if (this.form.piclist) {
             this.fileList = this.form.piclist.split(';')
           }
@@ -636,6 +667,7 @@ export default {
     // 清空三级目录缓存
     clearCategory(category) {
       localStorage.removeItem(category)
+      this.flushCategoryList()
       this.$message.success('缓存清除成功')
     },
     // 刷新三级List
@@ -670,6 +702,18 @@ export default {
 .sys-role-dialog {
   margin-top: 10px !important;
 
+}
+#deviceoperate-description > textarea {
+  color: red!important;
+}
+.deviceoperate-limit > input {
+  color: red!important;
+}
+.deviceoperate-limit {
+  color: red!important;
+}
+#deviceoperate-description {
+  color: red!important;
 }
 </style>
 

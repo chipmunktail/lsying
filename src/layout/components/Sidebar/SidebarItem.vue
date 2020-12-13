@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!item.hidden">
+  <div v-if="(!item.hidden && item.name !== 'system') || (item.name === 'system' && isSystemManage)">
     <template v-if="hasOneShowingChild(item.children,item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&!item.alwaysShow">
       <app-link v-if="onlyOneChild.meta" :to="resolvePath(onlyOneChild.path)">
         <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{'submenu-title-noDropdown':!isNest}">
@@ -54,7 +54,12 @@ export default {
     // To fix https://github.com/PanJiaChen/vue-admin-template/issues/237
     // TODO: refactor with render function
     this.onlyOneChild = null
-    return {}
+    return {
+      isSystemManage: true
+    }
+  },
+  mounted() {
+    this.isSystemManage = JSON.parse(sessionStorage.userInfo).loginSysUserVo.permissionCodes.includes('system:management')
   },
   methods: {
     hasOneShowingChild(children = [], parent) {
