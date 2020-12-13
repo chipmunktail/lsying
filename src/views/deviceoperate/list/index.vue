@@ -183,8 +183,8 @@
     />
 
     <device-dialog ref="detailPage" is-detail />
-    <device-dialog ref="addPage" is-add @change="getPageListBydid(deviceId)" />
-    <device-dialog ref="updatePage" is-update @change="getPageListBydid(deviceId)" />
+    <device-dialog ref="addPage" is-add @change="handlePageChange(deviceId)" />
+    <device-dialog ref="updatePage" is-update @change="handlePageChange(deviceId)" />
     <device-dialog ref="copyPage" is-copy @copy="handleCopyedit" />
   </div>
 </template>
