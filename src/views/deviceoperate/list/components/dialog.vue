@@ -37,7 +37,7 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="价格" prop="price">
-        <el-input  v-model="form.price" :readonly="isDetail" oninput="if(value<300)value=300;if(value>9999999)value=9999999; value=value.replace(/\D/g,'');value=value.replace('.','')" />
+        <el-input v-model="form.price" :readonly="isDetail" oninput="if(value<300)value=300;if(value>9999999)value=9999999; value=value.replace(/\D/g,'');value=value.replace('.','')" />
       </el-form-item>
       <el-form-item label="一级类目" prop="firstCategory">
         <el-select
@@ -456,10 +456,10 @@ export default {
       productApi.detail(id).then((response) => {
         if (response.code === 200) {
           this.form = response.data;
-          this.form.upend = 30
-          this.form.upstart = 10
-          this.form.leftend = 30
-          this.form.leftstart = 10
+          this.$set(this.form, 'upend', 30)
+          this.$set(this.form, 'upstart', 10)
+          this.$set(this.form, 'leftend', 30)
+          this.$set(this.form, 'leftstart', 10)
           if (this.form.piclist) {
             this.fileList = this.form.piclist.split(';')
           }
