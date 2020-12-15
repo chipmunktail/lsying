@@ -19,7 +19,7 @@
         <el-input v-model="form.name" :readonly="isDetail" autocomplete="off" :class="form.name.length > 40 ? 'deviceoperate-limit' : ''" />
         {{ form.name.length }}/40
       </el-form-item>
-      <el-form-item label="随机字符" prop="state">
+      <!-- <el-form-item label="随机字符" prop="state">
         <el-radio-group
           v-model="form.state"
           :disabled="isDetail"
@@ -29,7 +29,7 @@
           <el-radio :label="2">后2随机</el-radio>
           <el-radio :label="3">无</el-radio>
         </el-radio-group>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="上架状态" prop="shelfStatus">
         <el-radio-group v-model="form.shelfStatus" :disabled="isDetail">
           <el-radio :label="1">上架</el-radio>
